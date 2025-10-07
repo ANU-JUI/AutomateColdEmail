@@ -78,20 +78,87 @@ Best regards,
             attachResume: emailTemplate.attachResume
         };
         // In a real app, you would make the API call here.
-        console.log('Sending single email:', emailRequest);
-        showNotification(`✅ Email sent successfully to ${employee.name}`);
+        try {
+            const response = await fetch('http://localhost:9000/api/email/send-single', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(emailRequest)
+            });
+            
+            if (response.ok) {
+                showNotification(`✅ Email sent successfully to ${employee.name}`);
+            } else {
+                showNotification(`❌ Failed to send email to ${employee.name}`);
+            }
+        } catch (error) {
+            console.error('Error sending email:', error);
+            showNotification(`❌ Error sending email to ${employee.name}`);
+        }
     };
 
     const sendToSelected = async () => {
+        const selectedContacts = employees.filter(emp => selectedEmployees.includes(emp.id));
+        
+        const emailRequests = selectedContacts.map(emp => ({
+            toEmail: emp.email,
+            toName: emp.name,
+            subject: emailTemplate.subject.replace('[HR_NAME]', emp.name),
+            body: emailTemplate.body.replace('[HR_NAME]', emp.name),
+            attachResume: emailTemplate.attachResume
+        }));
         // ... API call logic would go here
-        const selectedCount = selectedEmployees.length;
-        showNotification(`✅ Emails sent successfully to ${selectedCount} contacts`);
+         try {
+            const response = await fetch('http://localhost:9000/api/email/send-bulk', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(emailRequests)
+            });
+            
+            if (response.ok) {
+                showNotification(`✅ Emails sent successfully to ${selectedContacts.length} contacts`);
+            } else {
+                showNotification('❌ Failed to send emails to selected contacts');
+            }
+        } catch (error) {
+            console.error('Error sending bulk emails:', error);
+            showNotification('❌ Error sending emails');
+        }
+        //const selectedCount = selectedEmployees.length;
+        //showNotification(`✅ Emails sent successfully to ${selectedCount} contacts`);
     };
 
     const sendToAll = async () => {
+         const emailRequests = employees.map(emp => ({
+            toEmail: emp.email,
+            toName: emp.name,
+            subject: emailTemplate.subject.replace('[HR_NAME]', emp.name),
+            body: emailTemplate.body.replace('[HR_NAME]', emp.name),
+            attachResume: emailTemplate.attachResume
+        }));
         // ... API call logic would go here
         const allCount = employees.length;
-        showNotification(`✅ Emails sent successfully to all ${allCount} contacts`);
+        try {
+            const response = await fetch('http://localhost:9000/api/email/send-bulk', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(emailRequests)
+            });
+            
+            if (response.ok) {
+                showNotification(`✅ Emails sent successfully to all ${allCount} contacts`);
+            } else {
+                showNotification('❌ Failed to send bulk emails');
+            }
+        } catch (error) {
+            console.error('Error sending bulk emails:', error);
+            showNotification('❌ Error sending emails');
+        }
     };
 
     // --- Selection Handlers ---

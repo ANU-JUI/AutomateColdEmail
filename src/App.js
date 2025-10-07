@@ -4,15 +4,15 @@ import Add from './components/addEmployee';
 import Edit from './components/EditEmployee';
 import './App.css';
 import { BrowserRouter, Routes , Route } from 'react-router-dom';
+import HRContacts from './components/employee';
 function App() {
   return (
     <>
     <BrowserRouter>
-    <Navbar/>
     <Routes>
-    <Route index element ={<Employee/>}/>
+    <Route index element ={<HRContacts/>}/>
     <Route path="/addEmployee" element ={<Add/>}/>
-    <Route path="/EditEmployee" element ={<Edit/>}/>
+    <Route path="/editemployee/:id" element ={<Edit/>}/>
 </Routes>    
 
     </BrowserRouter>

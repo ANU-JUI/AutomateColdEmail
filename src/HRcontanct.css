@@ -1,0 +1,267 @@
+.hr-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 2rem; /* Updated for better spacing */
+    display: flex; /* Added for centering */
+    flex-direction: column; /* Added for centering */
+    align-items: center; /* Added for centering */
+    justify-content: center; /* Added for centering */
+}
+
+.hr-header {
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.hr-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+/* Email Template Card */
+.email-template-card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    border: none;
+}
+
+.email-template-card h5 {
+    color: #4a5568;
+    font-weight: 600;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 10px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.form-control {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem; /* Increased padding */
+    font-size: 1rem; /* Increased font size */
+    transition: all 0.3s ease;
+    line-height: 1.5; /* Added for better text flow */
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-check {
+    margin: 15px 0;
+}
+
+.form-check-input {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+}
+
+.form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+/* Search and Add Section */
+.search-add-section {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.input-group {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+}
+
+.input-group .form-control {
+    border: none;
+    border-radius: 8px 0 0 8px;
+}
+
+.input-group .btn {
+    border-radius: 0 8px 8px 0;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    font-weight: 600;
+}
+
+.btn-outline-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 10px 25px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* Bulk Actions */
+.bulk-actions {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border-left: 5px solid #667eea;
+}
+
+.bulk-actions .btn {
+    margin: 0 8px 8px 0;
+    padding: 10px 20px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #48bb78, #38a169);
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #ed8936, #dd6b20);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #718096, #4a5568);
+}
+
+.bulk-actions .btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.bulk-actions .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Table Styling */
+.hr-table-container {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.table {
+    margin-bottom: 0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table thead th {
+    background: linear-gradient(135deg, #4a5568, #2d3748);
+    color: white;
+    border: none;
+    padding: 15px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.table tbody td {
+    padding: 15px;
+    vertical-align: middle;
+    border-color: #e2e8f0;
+    text-align: center;
+}
+
+.table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.table tbody tr:hover {
+    background-color: #f7fafc;
+    transform: scale(1.01);
+}
+
+/* Action Buttons */
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    margin: 2px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #f56565, #e53e3e);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #48bb78, #38a169);
+}
+
+.btn-sm:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+
+/* Checkbox Styling */
+.table input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* Text Muted */
+.text-muted {
+    color: #a0aec0 !important;
+    font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hr-container {
+        padding: 1rem; /* Adjust padding for smaller screens */
+        justify-content: flex-start; /* Align to top on mobile */
+    }
+
+    .hr-header h1 {
+        font-size: 2rem;
+    }
+    
+    .email-template-card,
+    .search-add-section,
+    .bulk-actions,
+    .hr-table-container {
+        padding: 15px;
+    }
+    
+    .bulk-actions .btn {
+        width: 100%;
+        margin: 5px 0;
+    }
+}

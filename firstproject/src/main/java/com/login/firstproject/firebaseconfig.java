@@ -14,8 +14,7 @@ public class firebaseconfig {
     @Bean
     public FirebaseApp initializeFirebase() throws IOException {
         FileInputStream serviceAccount =
-                new FileInputStream("C:\\Users\\DELL\\Desktop\\Employee Management System\\empMgmtSys\\anu-e8b98-firebase-adminsdk-8i7fc-339f5a6310.json");
-
+                new FileInputStream("C:\\Users\\DELL\\Desktop\\Employee Management System\\AutomateColdEmail\\anu-e8b98-firebase-adminsdk-8i7fc-339f5a6310.json");
         FirebaseOptions options = new FirebaseOptions.Builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                 .build();

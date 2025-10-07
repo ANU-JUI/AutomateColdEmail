@@ -1,9 +1,40 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-position: center;
+}
 
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f8fafc;
+    line-height: 1.6;
+    background-position: center;
+}
 
-body{
-  background-image: url('./images/Employee self services.webp');
-  background-size: cover;
-  height: 50vh;
-  background-repeat: no-repeat;
+.App {
+    min-height: 100vh;
+}
 
+/* Smooth transitions */
+.btn, .form-control, .table {
+    transition: all 0.3s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
 }

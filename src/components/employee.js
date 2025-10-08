@@ -263,6 +263,7 @@ Best regards,
             display: flex;
             align-items: center;
             flex-wrap: wrap;
+            padding: 10px;
         }
         .btn-outline-primary {
             background: transparent;
@@ -394,7 +395,7 @@ Best regards,
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 style={{flexGrow: 1}}
                             />
-                            <button className="btn btn-primary" type="submit">Search</button>
+                            <button className="btn btn-primary" style={{padding:'10px', borderRadius:'7px'}} type="submit">Search</button>
                             <a href="/addemployee" className="btn btn-outline-primary">➕ Add HR Contact</a>
                         </form>
                     </div>
@@ -406,7 +407,7 @@ Best regards,
                         <button className="btn btn-warning" onClick={sendToAll} disabled={employees.length === 0}>
                             📨 Send to All ({employees.length})
                         </button>
-                        <button className="btn btn-secondary" onClick={exportToCSV}>
+                        <button className="btn btn-secondary"  onClick={() => window.location.href = "http://localhost:9000/users/export"}>
                             📊 Export to CSV
                         </button>
                     </div>

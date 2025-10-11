@@ -11,7 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/email")
 @CrossOrigin(origins = {
-    "https://earnest-khapse-d6a229.netlify.app/*",
+    "https://earnest-khapse-d6a229.netlify.app/",
     "http://localhost:3000"
 })
 public class EmailController {

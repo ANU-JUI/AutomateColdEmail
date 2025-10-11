@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin(origins = {
-    "https://automatecoldemail-frontend.onrender.com",
+    "https://earnest-khapse-d6a229.netlify.app/",
     "http://localhost:3000"
 })
 @RequestMapping("/users")

@@ -13,8 +13,12 @@ public class firebaseconfig {
     @SuppressWarnings("deprecation")
     @Bean
     public FirebaseApp initializeFirebase() throws IOException {
+        String keyPath = System.getenv("firebase");
+        if (keyPath == null || keyPath.isEmpty()) {
+            throw new IOException("Missing GOOGLE_APPLICATION_CREDENTIALS environment variable");
+        }
         FileInputStream serviceAccount =
-                new FileInputStream("anu-e8b98-firebase-adminsdk-8i7fc-339f5a6310.json");
+                new FileInputStream(keyPath);
         FirebaseOptions options = new FirebaseOptions.Builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                 .build();

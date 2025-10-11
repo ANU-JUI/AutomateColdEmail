@@ -23,24 +23,20 @@ public class Emailconfig {
     @Value("${spring.mail.password:}")
     private String password;
 
-    @Bean
-    public JavaMailSender javaMailSender() {
-        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost(host);
-        mailSender.setPort(port);
-        mailSender.setUsername(username);
-        mailSender.setPassword(password);
-
-        Properties props = mailSender.getJavaMailProperties();
-        props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.ssl.enable", "true"); // Enable SSL
-        props.put("mail.smtp.socketFactory.port", "465");
-        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        props.put("mail.smtp.socketFactory.fallback", "false");
-        // Remove STARTTLS properties since we're using SSL
-        props.put("mail.debug", "true");
-
-        return mailSender;
-    }
+   @Bean
+public JavaMailSender javaMailSender() {
+    JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+    mailSender.setHost("smtp.gmail.com");
+    mailSender.setPort(465);
+    mailSender.setUsername(System.getenv("spring.mail.username"));
+    mailSender.setPassword(System.getenv("spring.mail.password"));
+    
+    Properties props = mailSender.getJavaMailProperties();
+    props.put("mail.smtp.auth", "true");
+    props.put("mail.smtp.ssl.enable", "true");
+    props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+    props.put("mail.debug", "true");
+    
+    return mailSender;
+}
 }

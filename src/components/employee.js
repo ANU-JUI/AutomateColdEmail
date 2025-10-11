@@ -39,7 +39,7 @@ Best regards,
             setEmployees(response.data);
         }).catch(error => {
             console.log(error);
-            showNotification('Failed to fetch employees.', 'error');
+            showNotification('Failed to fetch HR.', 'error');
         });
     };
 
@@ -47,10 +47,10 @@ Best regards,
         EmployeeService.delete(employeeId).then(() => {
             getAllEmployees();
             setSelectedEmployees(selectedEmployees.filter(id => id !== employeeId));
-            showNotification('Employee deleted successfully.');
+            showNotification('HR deleted successfully.');
         }).catch(error => {
             console.log(error);
-            showNotification('Failed to delete employee.', 'error');
+            showNotification('Failed to delete HR.', 'error');
         });
     };
 
@@ -61,7 +61,7 @@ Best regards,
                 setEmployees(response.data);
             }).catch(error => {
                 console.log(error);
-                showNotification('Error searching employees.', 'error');
+                showNotification('Error searching HR.', 'error');
             });
         } else {
             getAllEmployees();

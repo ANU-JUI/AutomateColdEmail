@@ -9,7 +9,7 @@
 /coverage
 
 # production
-
+/build
 anu-e8b98-firebase-adminsdk-8i7fc-339f5a6310.json
 # misc
 .DS_Store

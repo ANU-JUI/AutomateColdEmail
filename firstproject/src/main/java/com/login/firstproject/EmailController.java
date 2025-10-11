@@ -10,7 +10,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/email")
-@CrossOrigin("http://localhost:3000/")
+@CrossOrigin(origins = {
+    "https://automatecoldemail-frontend.onrender.com",
+    "http://localhost:3000"
+})
 public class EmailController {
 
     @Autowired

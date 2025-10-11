@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = "http://localhost:9000/users";
+const BASE_URL = "https://automatecoldemail-bakend.onrender.com/users";
 
 class EmployeeService {
     save(employee) {

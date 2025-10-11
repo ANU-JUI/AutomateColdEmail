@@ -79,7 +79,7 @@ Best regards,
         };
         // In a real app, you would make the API call here.
         try {
-            const response = await fetch('http://localhost:9000/api/email/send-single', {
+            const response = await fetch('https://automatecoldemail-bakend.onrender.com/api/email/send-single', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -110,7 +110,7 @@ Best regards,
         }));
         // ... API call logic would go here
          try {
-            const response = await fetch('http://localhost:9000/api/email/send-bulk', {
+            const response = await fetch('https://automatecoldemail-bakend.onrender.com/api/email/send-bulk', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -142,7 +142,7 @@ Best regards,
         // ... API call logic would go here
         const allCount = employees.length;
         try {
-            const response = await fetch('http://localhost:9000/api/email/send-bulk', {
+            const response = await fetch('https://automatecoldemail-bakend.onrender.com/api/email/send-bulk', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

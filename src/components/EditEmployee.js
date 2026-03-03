@@ -23,11 +23,11 @@ const EditEmployee = () => {
         setLoading(true);
         setError(null);
         const fetchedEmployee = { id:id, password: "" };
-                setEmployee(fetchedEmployee);
-                setOriginalEmployee(fetchedEmployee); 
-                setLoading(false);
+        setEmployee(fetchedEmployee);
+        setOriginalEmployee(fetchedEmployee); 
+        setLoading(false);
         // Use the 'id' from the URL to fetch the specific employee's data.
-     }, [id, navigate]);
+    }, [id, navigate]);
     
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -41,7 +41,8 @@ const EditEmployee = () => {
             setResumeName(file.name);
         }
     };
-    //const data=EmployeeService.getEm, resumeployeeById(id);
+
+    //const data=EmployeeService.getEmployeeById(id);
     const handleUpdate = (e) => {
         e.preventDefault();
         const payload = { ...employee };
@@ -49,7 +50,7 @@ const EditEmployee = () => {
             delete payload.password;
         }
 
-        EmployeeService.update(payload)
+        EmployeeService.update(payload, resume)
             .then(() => {
                 navigate("/");
             })
@@ -121,7 +122,9 @@ const EditEmployee = () => {
         .form-input:disabled {
             background-color: #f7fafc;
             color: #a0aec0;
-          ile-input-wrapper {
+            cursor: not-allowed;
+        }
+        .file-input-wrapper {
             position: relative;
             overflow: hidden;
             display: inline-block;
@@ -158,8 +161,6 @@ const EditEmployee = () => {
             color: #48bb78;
             font-weight: 600;
             margin-top: 0.5rem;
-        }
-        .f  cursor: not-allowed;
         }
         .form-actions {
             display: flex;
@@ -213,24 +214,7 @@ const EditEmployee = () => {
     `;
 
     if (loading) {
-        return <div className="status-containgroup">
-                            <label className="file-input-label">Resume (Optional)</label>
-                            <div className="file-input-wrapper">
-                                <label htmlFor="resume-input" className="file-input-button">
-                                    📄 Click to upload or drag and drop
-                                </label>
-                                <input
-                                    id="resume-input"
-                                    type="file"
-                                    name="resume"
-                                    accept=".pdf,.doc,.docx"
-                                    className="file-input-hidden"
-                                    onChange={handleResumeChange}
-                                />
-                            </div>
-                            {resumeName && <div className="resume-selected">✓ {resumeName}</div>}
-                        </div>
-                        <div className="form-er"><h2>Loading Employee Data...</h2></div>;
+        return <div className="status-container"><h2>Loading Employee Data...</h2></div>;
     }
 
     if (error) {
@@ -268,6 +252,23 @@ const EditEmployee = () => {
                             <label className="form-label">New Password</label>
                             <input type="password" name="password" value={employee.password} placeholder="Enter password" className="form-input" onChange={handleChange} />
                         </div>
+                        <div className="form-group">
+                            <label className="file-input-label">Resume (Optional)</label>
+                            <div className="file-input-wrapper">
+                                <label htmlFor="resume-input" className="file-input-button">
+                                    📄 Click to upload or drag and drop
+                                </label>
+                                <input
+                                    id="resume-input"
+                                    type="file"
+                                    name="resume"
+                                    accept=".pdf,.doc,.docx"
+                                    className="file-input-hidden"
+                                    onChange={handleResumeChange}
+                                />
+                            </div>
+                            {resumeName && <div className="resume-selected">✓ {resumeName}</div>}
+                        </div>
                         <div className="form-actions">
                             <button type="submit" className="btn btn-save">Update</button>
                             <button type="button" className="btn btn-clear" onClick={handleClear}>Reset</button>
@@ -281,4 +282,3 @@ const EditEmployee = () => {
 };
 
 export default EditEmployee;
-

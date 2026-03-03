@@ -12,6 +12,8 @@ const EditEmployee = () => {
     
     // State for the form, loading status, and any potential errors
     const [employee, setEmployee] = useState({ name: "", email: "", password: "", id: id });
+    const [resume, setResume] = useState(null);
+    const [resumeName, setResumeName] = useState("");
     const [originalEmployee, setOriginalEmployee] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -31,7 +33,15 @@ const EditEmployee = () => {
         const { name, value } = e.target;
         setEmployee(prev => ({ ...prev, [name]: value }));
     };
-    //const data=EmployeeService.getEmployeeById(id);
+
+    const handleResumeChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setResume(file);
+            setResumeName(file.name);
+        }
+    };
+    //const data=EmployeeService.getEm, resumeployeeById(id);
     const handleUpdate = (e) => {
         e.preventDefault();
         const payload = { ...employee };
@@ -51,6 +61,8 @@ const EditEmployee = () => {
     
     const handleClear = () => {
         setEmployee(originalEmployee || { name: "", email: "", password: "", id: "" });
+        setResume(null);
+        setResumeName("");
     };
 
     const styles = `
@@ -109,7 +121,45 @@ const EditEmployee = () => {
         .form-input:disabled {
             background-color: #f7fafc;
             color: #a0aec0;
-            cursor: not-allowed;
+          ile-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+        .file-input-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #4a5568;
+            font-weight: 600;
+        }
+        .file-input-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: #f7fafc;
+            border: 2px dashed #cbd5e0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            color: #4a5568;
+            transition: all 0.3s ease;
+        }
+        .file-input-button:hover {
+            background: #edf2f7;
+            border-color: #667eea;
+        }
+        .file-input-hidden {
+            display: none;
+        }
+        .resume-selected {
+            color: #48bb78;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        .f  cursor: not-allowed;
         }
         .form-actions {
             display: flex;
@@ -163,7 +213,24 @@ const EditEmployee = () => {
     `;
 
     if (loading) {
-        return <div className="status-container"><h2>Loading Employee Data...</h2></div>;
+        return <div className="status-containgroup">
+                            <label className="file-input-label">Resume (Optional)</label>
+                            <div className="file-input-wrapper">
+                                <label htmlFor="resume-input" className="file-input-button">
+                                    📄 Click to upload or drag and drop
+                                </label>
+                                <input
+                                    id="resume-input"
+                                    type="file"
+                                    name="resume"
+                                    accept=".pdf,.doc,.docx"
+                                    className="file-input-hidden"
+                                    onChange={handleResumeChange}
+                                />
+                            </div>
+                            {resumeName && <div className="resume-selected">✓ {resumeName}</div>}
+                        </div>
+                        <div className="form-er"><h2>Loading Employee Data...</h2></div>;
     }
 
     if (error) {

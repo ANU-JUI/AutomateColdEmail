@@ -2,20 +2,28 @@ package com.login.firstproject;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.Response;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Attachments;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
+
+import java.io.IOException;
+import java.util.Base64;
 
 @Service
 public class Emailservice {
 
     @Autowired
-    private JavaMailSender mailSender;
+    private com.sendgrid.SendGrid sendGrid;
+
+    @Value("${sendgrid.from:}")
+    private String fromAddress;
 
     @Value("${resume.drive.link:#{null}}") // Default to null if not set
     private String resumeDriveLink;
@@ -23,34 +31,36 @@ public class Emailservice {
     private final RestTemplate restTemplate = new RestTemplate();
 
     public void sendEmail(String toEmail, String toName, String subject, String body, boolean attachResume) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        Mail mail = new Mail();
+        mail.setFrom(new Email(fromAddress));
+        mail.setSubject(subject);
+        mail.addContent(new Content("text/plain", body));
 
-            helper.setTo(toEmail);
-            helper.setSubject(subject);
-            helper.setText(body, false);
+        com.sendgrid.helpers.mail.objects.Personalization personalization = new com.sendgrid.helpers.mail.objects.Personalization();
+        personalization.addTo(new Email(toEmail, toName));
+        mail.addPersonalization(personalization);
 
-            // Only attach resume if requested AND resume link is configured
-            if (attachResume && resumeDriveLink != null && !resumeDriveLink.isEmpty()) {
-                try {
-                    byte[] resumeData = downloadResumeFromDrive();
-                    if (resumeData != null) {
-                        helper.addAttachment("Resume.pdf", new ByteArrayResource(resumeData));
-                        System.out.println("Resume attached successfully");
-                    } else {
-                        System.out.println("Could not download resume from Drive");
-                    }
-                } catch (Exception e) {
-                    System.err.println("Failed to attach resume: " + e.getMessage());
-                    // Continue sending email without resume
-                }
+        if (attachResume && resumeDriveLink != null && !resumeDriveLink.isEmpty()) {
+            byte[] resumeData = downloadResumeFromDrive();
+            if (resumeData != null) {
+                Attachments attachment = new Attachments();
+                attachment.setFilename("Resume.pdf");
+                attachment.setType("application/pdf");
+                attachment.setDisposition("attachment");
+                attachment.setContent(Base64.getEncoder().encodeToString(resumeData));
+                mail.addAttachments(attachment);
             }
+        }
 
-            mailSender.send(message);
-            System.out.println("Email sent successfully to: " + toEmail);
-        } catch (MessagingException e) {
-            throw new RuntimeException("Failed to send email to: " + toEmail, e);
+        Request request = new Request();
+        try {
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+            Response response = sendGrid.api(request);
+            System.out.println("SendGrid response code: " + response.getStatusCode());
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to send email via SendGrid", ex);
         }
     }
 

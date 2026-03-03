@@ -67,4 +67,21 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 
 ### `npm run build` fails to minify
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify]
+
+---
+
+## Backend Email Configuration
+
+The Spring Boot backend now uses SendGrid for email delivery. To enable it:
+
+1. Create a SendGrid account and obtain an API key.
+2. Set the following properties in `src/main/resources/application.properties` or as environment variables:
+   ```properties
+   sendgrid.api.key=YOUR_KEY_HERE
+   sendgrid.from=sender@example.com
+   ```
+3. Restart the backend; emails will be sent via SendGrid rather than via SMTP.
+
+You may remove the old SMTP settings; they are no longer used.
+(https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)

@@ -1,12 +1,13 @@
 package com.login.firstproject;
 
 public class user {
-    String id,email,password,name;
+    String id,email,password,name,resume;
     public user(){}
     public user(String e,String i,String password,String name){
     this.id=i;
     this.email=e;
     this.password=password;
+    this.name=name;
 }
 public user(String e,String i,String n){
     this.id=i;
@@ -38,5 +39,12 @@ public String getPassword(){
         {
             id=i;
         }
+    public String getResume(){
+        return resume;}
+        public void setResume(String r)
+        {
+            resume=r;
+        }
 
 }
+

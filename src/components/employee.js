@@ -178,8 +178,31 @@ Best regards,
         }
     };
 
+    const importFromCSV = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (!file.name.endsWith('.csv')) {
+            showNotification('❌ Please select a CSV file', 'error');
+            return;
+        }
+
+        EmployeeService.importCSV(file)
+            .then((response) => {
+                showNotification(`✅ Successfully imported ${response.data.importedCount} HR contacts from CSV!`, 'success');
+                getAllEmployees();
+                e.target.value = '';  // Reset file input
+            })
+            .catch(error => {
+                console.error('Error importing CSV:', error);
+                const errorMsg = error.response?.data?.message || 'Failed to import CSV file';
+                showNotification(`❌ ${errorMsg}`, 'error');
+                e.target.value = '';  // Reset file input
+            });
+    };
+
     const exportToCSV = () => {
-        showNotification('📊 Export to CSV functionality coming soon!', 'info');
+        window.location.href = "http://localhost:9000/users/export";
     };
 
     const css = `
@@ -410,6 +433,15 @@ Best regards,
                         <button className="btn btn-secondary"  onClick={() => window.location.href = "http://localhost:9000/users/export"}>
                             📊 Export to CSV
                         </button>
+                        <label className="btn btn-info" style={{margin: 0, cursor: 'pointer'}}>
+                            📥 Import from CSV
+                            <input 
+                                type="file" 
+                                accept=".csv" 
+                                onChange={importFromCSV}
+                                style={{display: 'none'}}
+                            />
+                        </label>
                     </div>
 
                     <div className="hr-table-container">

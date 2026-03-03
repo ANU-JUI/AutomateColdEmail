@@ -3,15 +3,33 @@ import axios from 'axios';
 const BASE_URL = "https://automatecoldemail-bakend.onrender.com/users";
 
 class EmployeeService {
-    save(employee) {
-        return axios.post(`${BASE_URL}/create`, JSON.stringify(employee),
-            { headers: { 'Content-Type': 'application/json' } }
+    save(employee, resumeFile) {
+        const formData = new FormData();
+        formData.append('id', employee.id);
+        formData.append('name', employee.name);
+        formData.append('email', employee.email);
+        formData.append('password', employee.password);
+        if (resumeFile) {
+            formData.append('resume', resumeFile);
+        }
+        
+        return axios.post(`${BASE_URL}/create`, formData,
+            { headers: { 'Content-Type': 'multipart/form-data' } }
         );
     }
     
-    update(employee) {
-        return axios.put(`${BASE_URL}/update/` + employee.id, JSON.stringify(employee),
-            { headers: { 'Content-Type': 'application/json' } }
+    update(employee, resumeFile) {
+        const formData = new FormData();
+        formData.append('id', employee.id);
+        formData.append('name', employee.name);
+        formData.append('email', employee.email);
+        formData.append('password', employee.password);
+        if (resumeFile) {
+            formData.append('resume', resumeFile);
+        }
+        
+        return axios.put(`${BASE_URL}/update/` + employee.id, formData,
+            { headers: { 'Content-Type': 'multipart/form-data' } }
         );
     }
     
@@ -29,6 +47,21 @@ class EmployeeService {
     
     getEmployeeById(id) {
         return axios.get(`${BASE_URL}/get/` + id);
+    }
+    
+    downloadResume(id) {
+        return axios.get(`${BASE_URL}/download-resume/` + id, {
+            responseType: 'blob'
+        });
+    }
+
+    importCSV(csvFile) {
+        const formData = new FormData();
+        formData.append('file', csvFile);
+        
+        return axios.post(`${BASE_URL}/import-csv`, formData,
+            { headers: { 'Content-Type': 'multipart/form-data' } }
+        );
     }
 }
 

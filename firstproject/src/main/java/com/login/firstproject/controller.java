@@ -6,7 +6,6 @@ import com.google.firebase.auth.UserRecord;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -21,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin(origins = {
-    "https://earnest-khapse-d6a229.netlify.app/",
+    "https://automatecoldemails.netlify.app/",
     "http://localhost:3000"
 })
 @RequestMapping("/users")
@@ -33,30 +32,32 @@ public class controller {
 
     @PostMapping("/create")
     public ResponseEntity<?> createUser(
-            @RequestParam String id,
+            @RequestParam(required = false) String id,
             @RequestParam String name,
             @RequestParam String email,
-            @RequestParam String password,
-            @RequestParam(required = false) MultipartFile resume) 
-    { 
-        try { 
-            if (!isValidEmail(email)) { 
-                throw new IllegalArgumentException("Invalid email format: " + email); 
+            @RequestParam String company,
+            @RequestParam(required = false) MultipartFile resume)
+    {
+        try {
+            if (!isValidEmail(email)) {
+                throw new IllegalArgumentException("Invalid email format: " + email);
             }
             String resumePath = null;
             if (resume != null && !resume.isEmpty()) {
-                resumePath = firebaseService.saveResume(resume, id);
+                // if id is null we'll generate temporary id for file storage
+                String useId = (id == null || id.isEmpty()) ? java.util.UUID.randomUUID().toString() : id;
+                resumePath = firebaseService.saveResume(resume, useId);
             }
-            UserRecord userRecord = firebaseService.createUser(name, email, password, id, resumePath);
+            UserRecord userRecord = firebaseService.createUser(name, email, company, id, resumePath);
             return ResponseEntity.ok(userRecord);
-        } 
-        catch (IllegalArgumentException e) { 
-            return ResponseEntity.badRequest().body("Error: " + e.getMessage()); 
         }
-        catch (Exception e) { 
-            e.printStackTrace(); 
-            return ResponseEntity.status(500).body("Error creating user: " + e.getMessage()); 
-        } 
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error creating user: " + e.getMessage());
+        }
     }
 
     private boolean isValidEmail(String email) { 
@@ -65,9 +66,14 @@ public class controller {
     }
 
     @GetMapping("/{uid}")
-    public UserRecord getUser(@PathVariable String uid) {
+    public user getUser(@PathVariable String uid) {
         try {
-            return firebaseService.getUserById(uid);
+            UserRecord u = firebaseService.getUserById(uid);
+            String company = null;
+            if (u.getCustomClaims() != null && u.getCustomClaims().get("company") != null) {
+                company = u.getCustomClaims().get("company").toString();
+            }
+            return new user(u.getEmail(), u.getUid(), u.getDisplayName(), company);
         } catch (FirebaseAuthException e) {
             e.printStackTrace();
             return null;
@@ -78,12 +84,13 @@ public class controller {
     public ResponseEntity<byte[]> exportEmployees() {
         try {
             List<user> allUsers = firebaseService.listAllUsers();
-            StringBuilder csvData = new StringBuilder("ID,Name,Email\n");
+            StringBuilder csvData = new StringBuilder("ID,Name,Email,Company\n");
 
             for (user u : allUsers) {
                 csvData.append(u.getid()).append(",")
                        .append(u.getname()).append(",")
-                       .append(u.getEmail()).append("\n");
+                       .append(u.getEmail()).append(",")
+                       .append(u.getCompany() == null ? "" : u.getCompany()).append("\n");
             }
 
             byte[] csvBytes = csvData.toString().getBytes(StandardCharsets.UTF_8);
@@ -117,7 +124,8 @@ public class controller {
             // Filter users by name or email
             return allUsers.stream()
                     .filter(u -> u.getname().toLowerCase().contains(query.toLowerCase()) ||
-                                 u.getEmail().toLowerCase().contains(query.toLowerCase()))
+                                 u.getEmail().toLowerCase().contains(query.toLowerCase()) ||
+                                 (u.getCompany() != null && u.getCompany().toLowerCase().contains(query.toLowerCase())) )
                     .toList();
         } catch (FirebaseAuthException e) {
             e.printStackTrace();
@@ -148,22 +156,22 @@ public class controller {
             @PathVariable String id,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String email,
-            @RequestParam(required = false) String password,
+            @RequestParam(required = false) String company,
             @RequestParam(required = false) MultipartFile resume) {
         try {
-            if (email != null && !isValidEmail(email)) { 
-                throw new IllegalArgumentException("Invalid email format: " + email); 
+            if (email != null && !isValidEmail(email)) {
+                throw new IllegalArgumentException("Invalid email format: " + email);
             }
-            
+
             String resumePath = null;
             if (resume != null && !resume.isEmpty()) {
                 resumePath = firebaseService.saveResume(resume, id);
             }
-            
-            UserRecord userRecord = firebaseService.updateUserById(id, name, email, password, resumePath);
+
+            UserRecord userRecord = firebaseService.updateUserById(id, name, email, company, resumePath);
             return ResponseEntity.ok(userRecord);
-        } catch (IllegalArgumentException e) { 
-            return ResponseEntity.badRequest().body("Error: " + e.getMessage()); 
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
         catch (Exception e) {
             e.printStackTrace();

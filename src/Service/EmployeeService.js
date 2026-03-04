@@ -5,10 +5,12 @@ const BASE_URL = "https://automatecoldemail-bakend.onrender.com/users";
 class EmployeeService {
     save(employee, resumeFile) {
         const formData = new FormData();
-        formData.append('id', employee.id);
+        if (employee.id) {
+            formData.append('id', employee.id);
+        }
         formData.append('name', employee.name);
         formData.append('email', employee.email);
-        formData.append('password', employee.password);
+        formData.append('company', employee.company);
         if (resumeFile) {
             formData.append('resume', resumeFile);
         }
@@ -20,10 +22,11 @@ class EmployeeService {
     
     update(employee, resumeFile) {
         const formData = new FormData();
+        // id must be present for update
         formData.append('id', employee.id);
         formData.append('name', employee.name);
         formData.append('email', employee.email);
-        formData.append('password', employee.password);
+        formData.append('company', employee.company);
         if (resumeFile) {
             formData.append('resume', resumeFile);
         }
@@ -46,7 +49,8 @@ class EmployeeService {
     }
     
     getEmployeeById(id) {
-        return axios.get(`${BASE_URL}/get/` + id);
+        // endpoint was updated to return user at /users/{id}
+        return axios.get(`${BASE_URL}/` + id);
     }
     
     downloadResume(id) {

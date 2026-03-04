@@ -33,7 +33,21 @@ public class Emailservice {
     @Autowired
     private Employeeservice employeeservice;
 
-    public void sendEmail(String toEmail, String toName, String subject, String body, boolean attachResume, String resumeFilename) {
+    public void sendEmail(String toEmail, String toName, String subject, String body, String company, boolean attachResume, String resumeFilename) {
+        // replace placeholders server-side as well
+        if (body != null) {
+            body = body.replace("[HR_NAME]", toName == null ? "" : toName);
+            if (company != null) {
+                body = body.replace("[COMPANY_NAME]", company);
+            }
+        }
+        if (subject != null) {
+            subject = subject.replace("[HR_NAME]", toName == null ? "" : toName);
+            if (company != null) {
+                subject = subject.replace("[COMPANY_NAME]", company);
+            }
+        }
+
         Mail mail = new Mail();
         mail.setFrom(new Email(fromAddress));
         mail.setSubject(subject);
@@ -99,7 +113,8 @@ public class Emailservice {
     public void sendBulkEmails(java.util.List<EmailRequest> emailRequests) {
         for (EmailRequest request : emailRequests) {
             sendEmail(request.getToEmail(), request.getToName(), 
-                     request.getSubject(), request.getBody(), request.isAttachResume(), request.getResumeFilename());
+                     request.getSubject(), request.getBody(), request.getCompany(),
+                     request.isAttachResume(), request.getResumeFilename());
         }
     }
 }

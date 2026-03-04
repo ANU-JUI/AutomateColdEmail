@@ -8,6 +8,7 @@ public class EmailRequest {
     private String toName;
     private String subject;
     private String body;
+    private String company; // optional placeholder
     private boolean includeResumeLink;
     private boolean attachResume;
     private String resumeFilename;

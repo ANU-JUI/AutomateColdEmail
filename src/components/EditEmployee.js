@@ -11,7 +11,7 @@ const EditEmployee = () => {
     const navigate = useNavigate();
     
     // State for the form, loading status, and any potential errors
-    const [employee, setEmployee] = useState({ name: "", email: "", password: "", id: id });
+    const [employee, setEmployee] = useState({ name: "", email: "", company: "", id: id });
     const [resume, setResume] = useState(null);
     const [resumeName, setResumeName] = useState("");
     const [originalEmployee, setOriginalEmployee] = useState(null);
@@ -22,11 +22,29 @@ const EditEmployee = () => {
     useEffect(() => {
         setLoading(true);
         setError(null);
-        const fetchedEmployee = { id:id, password: "" };
-        setEmployee(fetchedEmployee);
-        setOriginalEmployee(fetchedEmployee); 
-        setLoading(false);
-        // Use the 'id' from the URL to fetch the specific employee's data.
+        // fetch existing employee data from backend
+        EmployeeService.getEmployeeById(id)
+            .then(resp => {
+                const data = resp.data || {};
+                setEmployee({
+                    id: data.id,
+                    name: data.name || "",
+                    email: data.email || "",
+                    company: data.company || ""
+                });
+                setOriginalEmployee({
+                    id: data.id,
+                    name: data.name || "",
+                    email: data.email || "",
+                    company: data.company || ""
+                });
+            })
+            .catch(err => {
+                console.error("Failed to fetch employee details", err);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     }, [id, navigate]);
     
     const handleChange = (e) => {
@@ -46,9 +64,8 @@ const EditEmployee = () => {
     const handleUpdate = (e) => {
         e.preventDefault();
         const payload = { ...employee };
-        if (!payload.password) {
-            delete payload.password;
-        }
+        // we don't handle passwords anymore
+        delete payload.password;
 
         EmployeeService.update(payload, resume)
             .then(() => {
@@ -61,7 +78,7 @@ const EditEmployee = () => {
     };
     
     const handleClear = () => {
-        setEmployee(originalEmployee || { name: "", email: "", password: "", id: "" });
+        setEmployee(originalEmployee || { name: "", email: "", company: "", id: "" });
         setResume(null);
         setResumeName("");
     };
@@ -249,8 +266,8 @@ const EditEmployee = () => {
                             <input type="email" name="email" value={employee.email} placeholder="Enter email address" className="form-input" onChange={handleChange} />
                         </div>
                         <div className="form-group">
-                            <label className="form-label">New Password</label>
-                            <input type="password" name="password" value={employee.password} placeholder="Enter password" className="form-input" onChange={handleChange} />
+                            <label className="form-label">Company</label>
+                            <input type="text" name="company" value={employee.company} placeholder="Enter company" className="form-input" onChange={handleChange} />
                         </div>
                         {/* Resume upload moved to main page; editing does not upload resumes */}
                         <div className="form-actions">

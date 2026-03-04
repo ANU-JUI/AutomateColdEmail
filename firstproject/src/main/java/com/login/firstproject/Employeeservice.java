@@ -113,24 +113,20 @@ public class Employeeservice {
                 String[] fields = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)"); // Handle quoted fields
                 
                 if (fields.length >= 3) {
-                    String id = fields[0].trim().replaceAll("^\"|\"$", "");
-                    String name = fields[1].trim().replaceAll("^\"|\"$", "");
-                    String email = fields[2].trim().replaceAll("^\"|\"$", "");
-                    
-                    // Generate a default password if not provided
-                    String password = fields.length > 3 ? 
-                        fields[3].trim().replaceAll("^\"|\"$", "") : 
-                        "TempPassword@123";
+                    String name = fields[0].trim().replaceAll("^\"|\"$", "");
+                    String email = fields[1].trim().replaceAll("^\"|\"$", "");
+                    String company = fields[2].trim().replaceAll("^\"|\"$", "");
                     
                     try {
                         // Validate email format
-                        if (isValidEmail(email) && !id.isEmpty() && !name.isEmpty()) {
-                            createUser(name, email, password, id);
+                        if (isValidEmail(email) && !name.isEmpty()) {
+                            // let Firebase auto-generate the uid
+                            createUser(name, email, company, null);
                             importedCount++;
                         }
                     } catch (FirebaseAuthException e) {
                         // Log error but continue with next user
-                        System.err.println("Error importing user " + id + ": " + e.getMessage());
+                        System.err.println("Error importing user " + email + ": " + e.getMessage());
                     }
                 }
             }
@@ -143,20 +139,32 @@ public class Employeeservice {
         return email.matches(emailRegex);
     }
 
-    public UserRecord createUser(String name, String email, String password, String uid, String resumePath) throws FirebaseAuthException {
+    public UserRecord createUser(String name, String email, String company, String uid, String resumePath) throws FirebaseAuthException {
         UserRecord.CreateRequest request = new UserRecord.CreateRequest()
                 .setDisplayName(name)
-                .setEmail(email)
-                .setPassword(password)
-                .setUid(uid);
+                .setEmail(email);
+
+        if (uid != null && !uid.isEmpty()) {
+            request.setUid(uid);
+        }
+
+        // password is not collected any more; firebase will auto generate a temporary password if
+        // you choose not to set one, but here we leave it unset (user will need to set password via
+        // reset flow if needed)
+        if (resumePath != null) {
+            // nothing to do with resume in Firebase account
+        }
 
         UserRecord userRecord = FirebaseAuth.getInstance().createUser(request);
-        //System.out.println("Successfully created new user: " + userRecord.getUid()); 
+        // set company as custom claim so we can retrieve it later
+        if (company != null) {
+            FirebaseAuth.getInstance().setCustomUserClaims(userRecord.getUid(), java.util.Map.of("company", company));
+        }
         return userRecord;
     }
 
-    public UserRecord createUser(String name, String email, String password, String uid) throws FirebaseAuthException {
-        return createUser(name, email, password, uid, null);
+    public UserRecord createUser(String name, String email, String company, String uid) throws FirebaseAuthException {
+        return createUser(name, email, company, uid, null);
     }
 
     public UserRecord getUserById(String uid) throws FirebaseAuthException {
@@ -181,7 +189,7 @@ public class Employeeservice {
         }
     }
 
-    public UserRecord updateUserById(String uid, String name, String email, String password, String resumePath) throws FirebaseAuthException {
+    public UserRecord updateUserById(String uid, String name, String email, String company, String resumePath) throws FirebaseAuthException {
         try {
             UserRecord.UpdateRequest req = new UserRecord.UpdateRequest(uid);
             if (name != null) {
@@ -190,10 +198,11 @@ public class Employeeservice {
             if (email != null) {
                 req.setEmail(email);
             }
-            if (password != null) {
-                req.setPassword(password);
-            }
             UserRecord user = FirebaseAuth.getInstance().updateUser(req);
+            // update company custom claim if provided
+            if (company != null) {
+                FirebaseAuth.getInstance().setCustomUserClaims(uid, java.util.Map.of("company", company));
+            }
             return user;
         } catch (Exception e) {
             e.printStackTrace();
@@ -201,21 +210,25 @@ public class Employeeservice {
         }
     }
 
-    public UserRecord updateUserById(String uid, String name, String email, String password) throws FirebaseAuthException {
-        return updateUserById(uid, name, email, password, null);
+    public UserRecord updateUserById(String uid, String name, String email, String company) throws FirebaseAuthException {
+        return updateUserById(uid, name, email, company, null);
     }
 
     public List<user> listAllUsers() throws FirebaseAuthException {
         try {
-            ListUsersPage page = FirebaseAuth.getInstance().listUsers(null); 
+            ListUsersPage page = FirebaseAuth.getInstance().listUsers(null);
             List<user> l = new ArrayList<>();
             for (UserRecord u : page.getValues()) {
-               user t = new user(u.getEmail(), u.getUid(), u.getDisplayName());
+               String company = null;
+               if (u.getCustomClaims() != null && u.getCustomClaims().get("company") != null) {
+                   company = u.getCustomClaims().get("company").toString();
+               }
+               user t = new user(u.getEmail(), u.getUid(), u.getDisplayName(), company);
                l.add(t);
-            } 
+            }
             return l;
-        } 
-        catch (FirebaseAuthException e) { 
+        }
+        catch (FirebaseAuthException e) {
             e.printStackTrace();
         }
         return null;

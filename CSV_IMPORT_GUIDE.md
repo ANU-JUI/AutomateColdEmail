@@ -5,31 +5,31 @@ The CSV import feature allows you to bulk import HR contacts into the system fro
 
 ## CSV File Format
 
-Your CSV file should have the following structure:
+Your CSV file should have the following structure (ID column is optional; if omitted an ID will be generated automatically):
 
 ```
-ID,Name,Email,Password
-emp001,John Doe,john.doe@company.com,SecurePass123
-emp002,Jane Smith,jane.smith@company.com,SecurePass456
-emp003,Robert Johnson,robert.j@company.com,SecurePass789
+Name,Email,Company
+John Doe,john.doe@company.com,ThoughtCorp
+Jane Smith,jane.smith@company.com,Acme Inc
+Robert Johnson,robert.j@company.com,Widgets LLC
 ```
 
 ### Column Requirements:
 
-1. **ID** (Required) - Unique identifier for the HR contact
-   - alphanumeric
-   - Must be unique across the system
-
-2. **Name** (Required) - Full name of the HR contact
+1. **Name** (Required) - Full name of the HR contact
    - Can contain spaces and special characters
 
-3. **Email** (Required) - Valid email address
+2. **Email** (Required) - Valid email address
    - Must follow email format: username@domain.com
    - Must be unique across the system
 
-4. **Password** (Optional) - Password for the account
-   - If not provided, system generates: `TempPassword@123`
-   - Recommended to change on first login
+3. **Company** (Optional) - Name of the company where the contact works
+   - This value will be made available as a placeholder in the email template (`[COMPANY_NAME]`)
+
+4. **ID** (Optional) - Unique identifier for the HR contact
+   - If not provided the system will generate one automatically
+   - Alphanumeric
+   - Must be unique when specified
 
 ## How to Import
 
@@ -43,21 +43,21 @@ emp003,Robert Johnson,robert.j@company.com,SecurePass789
 
 ### Minimal Format (3 columns):
 ```csv
-ID,Name,Email
-HR001,Alice Brown,alice@example.com
-HR002,Bob Wilson,bob@example.com
+Name,Email,Company
+Alice Brown,alice@example.com,Example Co
+Bob Wilson,bob@example.com,Another LLC
 ```
 
-### Full Format (4 columns with passwords):
+### Full Format (4 columns with optional custom ID):
 ```csv
-ID,Name,Email,Password
-HR001,Alice Brown,alice@example.com,MySecurePass@123
-HR002,Bob Wilson,bob@example.com,AnotherPass@456
+Name,Email,Company,ID
+Alice Brown,alice@example.com,Example Co,HR001
+Bob Wilson,bob@example.com,Another LLC,HR002
 ```
 
 ## Important Notes
 
-- **Header Row**: First row must contain column headers (ID, Name, Email, Password)
+- **Header Row**: First row must contain column headers (Name, Email, Company). An optional ID column may follow.
 - **CSV Format**: File must be a valid CSV file with `.csv` extension
 - **Validation**: Invalid rows are skipped, but valid rows will be imported
 - **Email Validation**: System validates email format

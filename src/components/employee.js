@@ -10,11 +10,7 @@ const HRContacts = () => {
         subject: "Interest in Career Opportunities at Your Company",
         body: `Dear [HR_NAME],
 
-I came across your profile and am very interested in potential opportunities at your organization. 
-
-I have attached my resume for your review and would appreciate the opportunity to discuss how my skills and experience could benefit your team.
-
-Thank you for your time and consideration.
+I came across your profile at [COMPANY_NAME] and am very interested in potential opportunities at your organization.
 
 Best regards,
 [Your Name]`,
@@ -78,8 +74,13 @@ Best regards,
         const emailRequest = {
             toEmail: employee.email,
             toName: employee.name,
-            subject: emailTemplate.subject.replace(/\[HR_NAME\]/g, employee.name),
-            body: emailTemplate.body.replace(/\[HR_NAME\]/g, employee.name),
+            company: employee.company,
+            subject: emailTemplate.subject
+                        .replace(/\[HR_NAME\]/g, employee.name)
+                        .replace(/\[COMPANY_NAME\]/g, employee.company || ''),
+            body: emailTemplate.body
+                        .replace(/\[HR_NAME\]/g, employee.name)
+                        .replace(/\[COMPANY_NAME\]/g, employee.company || ''),
             attachResume: emailTemplate.attachResume,
             resumeFilename: emailTemplate.attachResume ? frontResumeServerName : undefined
         };
@@ -110,11 +111,17 @@ Best regards,
         const emailRequests = selectedContacts.map(emp => ({
             toEmail: emp.email,
             toName: emp.name,
-            subject: emailTemplate.subject.replace('[HR_NAME]', emp.name),
-            body: emailTemplate.body.replace('[HR_NAME]', emp.name),
+            company: emp.company,
+            subject: emailTemplate.subject
+                        .replace('[HR_NAME]', emp.name)
+                        .replace('[COMPANY_NAME]', emp.company || ''),
+            body: emailTemplate.body
+                        .replace('[HR_NAME]', emp.name)
+                        .replace('[COMPANY_NAME]', emp.company || ''),
             attachResume: emailTemplate.attachResume,
             resumeFilename: emailTemplate.attachResume ? frontResumeServerName : undefined
         }));
+
         // ... API call logic would go here
          try {
             const response = await fetch('https://automatecoldemail-bakend.onrender.com/api/email/send-bulk', {
@@ -142,11 +149,17 @@ Best regards,
          const emailRequests = employees.map(emp => ({
             toEmail: emp.email,
             toName: emp.name,
-            subject: emailTemplate.subject.replace('[HR_NAME]', emp.name),
-            body: emailTemplate.body.replace('[HR_NAME]', emp.name),
+            company: emp.company,
+            subject: emailTemplate.subject
+                        .replace('[HR_NAME]', emp.name)
+                        .replace('[COMPANY_NAME]', emp.company || ''),
+            body: emailTemplate.body
+                        .replace('[HR_NAME]', emp.name)
+                        .replace('[COMPANY_NAME]', emp.company || ''),
             attachResume: emailTemplate.attachResume,
             resumeFilename: emailTemplate.attachResume ? frontResumeServerName : undefined
         }));
+
         // ... API call logic would go here
         const allCount = employees.length;
         try {
@@ -396,7 +409,7 @@ Best regards,
                                 rows="10"
                                 value={emailTemplate.body}
                                 onChange={(e) => setEmailTemplate({...emailTemplate, body: e.target.value})}
-                                placeholder="Enter email body... Use [HR_NAME] as placeholder"
+                                placeholder="Enter email body... Use [HR_NAME] and [COMPANY_NAME] as placeholders"
                             />
                         </div>
                         <div>
@@ -445,7 +458,7 @@ Best regards,
                             )}
                         </div>
                         <small className="text-muted" style={{display: 'block', marginTop: '10px'}}>
-                            💡 Use <strong>[HR_NAME]</strong> as placeholder for HR contact's name
+                            💡 Use <strong>[HR_NAME]</strong> and <strong>[COMPANY_NAME]</strong> as placeholders for contact's name and company
                         </small>
                     </div>
 
@@ -500,6 +513,7 @@ Best regards,
                                         <th>ID</th>
                                         <th>Name</th>
                                         <th>Email</th>
+                                        <th>Company</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -516,6 +530,7 @@ Best regards,
                                             <td><strong>{employee.id}</strong></td>
                                             <td>{employee.name}</td>
                                             <td>{employee.email}</td>
+                                            <td>{employee.company}</td>
                                             <td>
                                                 <a href={`/editemployee/${employee.id}` } className="btn btn-primary btn-sm">✏️ Edit</a>
                                                 <button className="btn btn-danger btn-sm" onClick={() => deleteEmployee(employee.id)}>🗑️ Delete</button>

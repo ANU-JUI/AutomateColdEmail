@@ -1,7 +1,5 @@
 package com.login.firstproject;
 
-import com.login.firstproject.EmailRequest;
-import com.login.firstproject.Emailservice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +9,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/email")
 @CrossOrigin(origins = {
-    "https://earnest-khapse-d6a229.netlify.app/",
+    "https://automatecoldemails.netlify.app/",
     "http://localhost:3000"
 })
 public class EmailController {
@@ -29,6 +27,7 @@ public class EmailController {
                 emailRequest.getToName(),
                 emailRequest.getSubject(),
                 emailRequest.getBody(),
+                emailRequest.getCompany(),
                 emailRequest.isAttachResume(),
                 emailRequest.getResumeFilename()
             );

@@ -6,6 +6,9 @@ const HRContacts = () => {
     const [selectedEmployees, setSelectedEmployees] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [notification, setNotification] = useState({ message: '', type: '', visible: false });
+    const [page, setPage] = useState(0);
+    const pageSize = 50;
+    const [lastLoadCount, setLastLoadCount] = useState(0);
     const [emailTemplate, setEmailTemplate] = useState({
         subject: "Interest in Career Opportunities at Your Company",
         body: `Dear [HR_NAME],
@@ -33,11 +36,13 @@ Best regards,
 
     useEffect(() => {
         getAllEmployees();
-    }, []);
+    }, [page]);
 
     const getAllEmployees = () => {
-        EmployeeService.getEmployee().then((response) => {
-            setEmployees(response.data);
+        EmployeeService.getEmployee(page, pageSize).then((response) => {
+            const list = response.data || [];
+            setEmployees(list);
+            setLastLoadCount(list.length);
         }).catch(error => {
             console.log(error);
             showNotification('Failed to fetch HR.', 'error');
@@ -55,9 +60,28 @@ Best regards,
         });
     };
 
+    const deleteAllEmployees = () => {
+        if (window.confirm('⚠️ Are you sure you want to delete ALL HR contacts? This action cannot be undone.')) {
+            const deletePromises = employees.map(emp => EmployeeService.delete(emp.id));
+            Promise.all(deletePromises)
+                .then(() => {
+                    setSelectedEmployees([]);
+                    setPage(0);
+                    getAllEmployees();
+                    showNotification(`✅ All HR contacts deleted successfully!`);
+                })
+                .catch(error => {
+                    console.error('Error deleting contacts:', error);
+                    showNotification('❌ Error deleting some contacts', 'error');
+                });
+        }
+    };
+
     const searchEmployees = (e) => {
         e.preventDefault();
         if (searchTerm.trim()) {
+            // reset pagination when searching
+            setPage(0);
             EmployeeService.searchEmployee(searchTerm).then((response) => {
                 setEmployees(response.data);
             }).catch(error => {
@@ -211,6 +235,7 @@ Best regards,
         EmployeeService.importCSV(file)
             .then((response) => {
                 showNotification(`✅ Successfully imported ${response.data.importedCount} HR contacts from CSV!`, 'success');
+                setPage(0);
                 getAllEmployees();
                 e.target.value = '';  // Reset file input
             })
@@ -496,9 +521,19 @@ Best regards,
                                 style={{display: 'none'}}
                             />
                         </label>
+                        <button className="btn btn-danger" onClick={deleteAllEmployees} disabled={employees.length === 0}>
+                            🗑️ Delete All
+                        </button>
                     </div>
 
                     <div className="hr-table-container">
+                        <div style={{marginBottom:'1rem', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                            <div>
+                                <button className="btn btn-sm" onClick={() => setPage(p => Math.max(p-1,0))} disabled={page===0}>◀ Prev</button>
+                                <button className="btn btn-sm" onClick={() => setPage(p => p+1)} disabled={lastLoadCount < pageSize}>Next ▶</button>
+                            </div>
+                            <div>Page {page+1}</div>
+                        </div>
                         <div className="table-responsive">
                             <table className="table">
                                 <thead>

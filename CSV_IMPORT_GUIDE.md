@@ -5,7 +5,7 @@ The CSV import feature allows you to bulk import HR contacts into the system fro
 
 ## CSV File Format
 
-Your CSV file should have the following structure (ID column is optional; if omitted an ID will be generated automatically):
+Your CSV file should have the following structure (ID column is optional; if omitted a **numeric** ID will be generated automatically):
 
 ```
 Name,Email,Company
@@ -62,6 +62,7 @@ Bob Wilson,bob@example.com,Another LLC,HR002
 - **Validation**: Invalid rows are skipped, but valid rows will be imported
 - **Email Validation**: System validates email format
 - **Duplicates**: Users with duplicate IDs or emails may cause import failures
+- **ID Generation**: If you omit the ID column the system will create a numeric identifier (timestamp‑based); provided IDs must be numeric if supplied
 - **Quotes**: Fields with commas should be enclosed in quotes: `"ID, Special Name",Name1,email@example.com`
 - **Character Encoding**: Use UTF-8 encoding for support of special characters
 

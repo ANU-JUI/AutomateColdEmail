@@ -9,7 +9,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/email")
 @CrossOrigin(origins = {
-    "https://automatecoldemails.netlify.app/",
+    "https://automatecoldemail.netlify.app/",
     "http://localhost:3000"
 })
 public class EmailController {

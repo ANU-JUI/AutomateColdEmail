@@ -140,20 +140,19 @@ public class Employeeservice {
     }
 
     public UserRecord createUser(String name, String email, String company, String uid, String resumePath) throws FirebaseAuthException {
+        // if no uid provided, generate a numeric identifier (timestamp) to satisfy requirement
+        if (uid == null || uid.isEmpty()) {
+            uid = String.valueOf(System.currentTimeMillis());
+        }
+
         UserRecord.CreateRequest request = new UserRecord.CreateRequest()
                 .setDisplayName(name)
-                .setEmail(email);
-
-        if (uid != null && !uid.isEmpty()) {
-            request.setUid(uid);
-        }
+                .setEmail(email)
+                .setUid(uid);
 
         // password is not collected any more; firebase will auto generate a temporary password if
         // you choose not to set one, but here we leave it unset (user will need to set password via
         // reset flow if needed)
-        if (resumePath != null) {
-            // nothing to do with resume in Firebase account
-        }
 
         UserRecord userRecord = FirebaseAuth.getInstance().createUser(request);
         // set company as custom claim so we can retrieve it later

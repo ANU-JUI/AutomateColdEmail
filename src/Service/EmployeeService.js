@@ -40,8 +40,8 @@ class EmployeeService {
         return axios.delete(`${BASE_URL}/delete/` + id);
     }
     
-    getEmployee() {
-        return axios.get(`${BASE_URL}/get`);
+    getEmployee(page = 0, size = 50) {
+        return axios.get(`${BASE_URL}/get?page=${page}&size=${size}`);
     }
     
     searchEmployee(keyword) {

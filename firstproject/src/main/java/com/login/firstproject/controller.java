@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin(origins = {
-    "https://automatecoldemails.netlify.app/",
+    "https://automatecoldemail.netlify.app/",
     "http://localhost:3000"
 })
 @RequestMapping("/users")
@@ -44,8 +44,8 @@ public class controller {
             }
             String resumePath = null;
             if (resume != null && !resume.isEmpty()) {
-                // if id is null we'll generate temporary id for file storage
-                String useId = (id == null || id.isEmpty()) ? java.util.UUID.randomUUID().toString() : id;
+                // save resume with eventual numeric id (timestamp) if not provided
+                String useId = (id == null || id.isEmpty()) ? String.valueOf(System.currentTimeMillis()) : id;
                 resumePath = firebaseService.saveResume(resume, useId);
             }
             UserRecord userRecord = firebaseService.createUser(name, email, company, id, resumePath);
@@ -106,9 +106,16 @@ public class controller {
     }
 
     @GetMapping("/get")
-    public List<user> getall() {
+    public List<user> getall(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size) {
         try {
-            return firebaseService.listAllUsers();
+            List<user> all = firebaseService.listAllUsers();
+            if (all == null) return List.of();
+            int start = page * size;
+            if (start >= all.size()) return List.of();
+            int end = Math.min(start + size, all.size());
+            return all.subList(start, end);
         } catch (FirebaseAuthException e) {
             e.printStackTrace();
             return null;

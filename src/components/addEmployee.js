@@ -3,8 +3,6 @@ import {useNavigate} from 'react-router-dom';
 import EmployeeService from '../Service/EmployeeService';
 const AddEmployee = () => {
     const [employee, setEmployee] = useState({ name: "", email: "", company: "" });
-    const [resume, setResume] = useState(null);
-    const [resumeName, setResumeName] = useState("");
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -12,25 +10,13 @@ const AddEmployee = () => {
         setEmployee(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleResumeChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setResume(file);
-            setResumeName(file.name);
-        }
-    };
-    
     const handleSave = (e) => {
         e.preventDefault();
         if (!employee.name || !employee.email || !employee.company) {
             alert("Please fill in all required fields");
             return;
         }
-        if (!resume) {
-            alert("Please upload a resume");
-            return;
-        }
-        EmployeeService.save(employee, resume)
+        EmployeeService.save(employee)
             .then(() => {
                 navigate("/");
             })
@@ -42,8 +28,6 @@ const AddEmployee = () => {
     
     const handleClear = () => {
         setEmployee({ name: "", email: "", company: "" });
-        setResume(null);
-        setResumeName("");
     };
 
     const styles = `
@@ -98,44 +82,6 @@ const AddEmployee = () => {
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
         }
-        .file-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-            width: 100%;
-        }
-        .file-input-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #4a5568;
-            font-weight: 600;
-        }
-        .file-input-button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            padding: 0.75rem 1rem;
-            background: #f7fafc;
-            border: 2px dashed #cbd5e0;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.95rem;
-            color: #4a5568;
-            transition: all 0.3s ease;
-        }
-        .file-input-button:hover {
-            background: #edf2f7;
-            border-color: #667eea;
-        }
-        .file-input-hidden {
-            display: none;
-        }
-        .resume-selected {
-            color: #48bb78;
-            font-weight: 600;
-            margin-top: 0.5rem;
-        }
         .form-actions {
             display: flex;
             justify-content: space-between;
@@ -163,24 +109,7 @@ const AddEmployee = () => {
         .btn-clear {
             background-color: #f7fafc;
             color: #4a5568;
-            border: 2px solid #e2e8f0;group">
-                            <label className="file-input-label">Resume</label>
-                            <div className="file-input-wrapper">
-                                <label htmlFor="resume-input" className="file-input-button">
-                                    📄 Click to upload or drag and drop
-                                </label>
-                                <input
-                                    id="resume-input"
-                                    type="file"
-                                    name="resume"
-                                    accept=".pdf,.doc,.docx"
-                                    className="file-input-hidden"
-                                    onChange={handleResumeChange}
-                                />
-                            </div>
-                            {resumeName && <div className="resume-selected">✓ {resumeName}</div>}
-                        </div>
-                        <div className="form-
+            border: 2px solid #e2e8f0;
         }
         .btn-clear:hover {
             background-color: #e2e8f0;

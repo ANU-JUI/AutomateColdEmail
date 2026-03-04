@@ -99,35 +99,41 @@ public class Employeeservice {
     public int importUsersFromCSV(MultipartFile file) throws IOException, FirebaseAuthException {
         int importedCount = 0;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
-            String line;
-            boolean isFirstLine = true;
-            
-            while ((line = reader.readLine()) != null) {
-                // Skip the header line
-                if (isFirstLine) {
-                    isFirstLine = false;
-                    continue;
-                }
+            String headerLine = reader.readLine();
+            if (headerLine == null) return 0;
 
-                // Parse CSV line
-                String[] fields = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)"); // Handle quoted fields
-                
-                if (fields.length >= 3) {
-                    String name = fields[0].trim().replaceAll("^\"|\"$", "");
-                    String email = fields[1].trim().replaceAll("^\"|\"$", "");
-                    String company = fields[2].trim().replaceAll("^\"|\"$", "");
-                    
-                    try {
-                        // Validate email format
-                        if (isValidEmail(email) && !name.isEmpty()) {
-                            // let Firebase auto-generate the uid
-                            createUser(name, email, company, null);
-                            importedCount++;
-                        }
-                    } catch (FirebaseAuthException e) {
-                        // Log error but continue with next user
-                        System.err.println("Error importing user " + email + ": " + e.getMessage());
+            // determine column order from header (case-insensitive)
+            String[] headers = headerLine.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+            int idxName = -1, idxEmail = -1, idxCompany = -1;
+            for (int i = 0; i < headers.length; i++) {
+                String h = headers[i].trim().replaceAll("^\"|\"$", "").toLowerCase();
+                if (h.equals("name") || h.equals("full name") || h.equals("fullname")) idxName = i;
+                else if (h.equals("email") || h.equals("email address") || h.equals("e-mail")) idxEmail = i;
+                else if (h.equals("company") || h.equals("employer") || h.equals("organisation") || h.equals("organization")) idxCompany = i;
+            }
+
+            // Fallback to positional mapping if headers are not recognized
+            if (idxName == -1 || idxEmail == -1) {
+                idxName = 0;
+                idxEmail = 1;
+                idxCompany = Math.max(2, idxCompany);
+            }
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] fields = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+
+                String name = idxName < fields.length ? fields[idxName].trim().replaceAll("^\"|\"$", "") : "";
+                String email = idxEmail < fields.length ? fields[idxEmail].trim().replaceAll("^\"|\"$", "") : "";
+                String company = idxCompany < fields.length ? fields[idxCompany].trim().replaceAll("^\"|\"$", "") : "";
+
+                try {
+                    if (isValidEmail(email) && !name.isEmpty()) {
+                        createUser(name, email, company, null);
+                        importedCount++;
                     }
+                } catch (FirebaseAuthException e) {
+                    System.err.println("Error importing user " + email + ": " + e.getMessage());
                 }
             }
         }
@@ -139,10 +145,11 @@ public class Employeeservice {
         return email.matches(emailRegex);
     }
 
-    public UserRecord createUser(String name, String email, String company, String uid, String resumePath) throws FirebaseAuthException {
-        // if no uid provided, generate a numeric identifier (timestamp) to satisfy requirement
+    // create a new Firebase user; resumes are handled separately through update endpoint
+    // if no uid provided, we generate a sequential numeric identifier (1,2,3,...)
+    public UserRecord createUser(String name, String email, String company, String uid) throws FirebaseAuthException {
         if (uid == null || uid.isEmpty()) {
-            uid = String.valueOf(System.currentTimeMillis());
+            uid = generateNextNumericUid();
         }
 
         UserRecord.CreateRequest request = new UserRecord.CreateRequest()
@@ -150,20 +157,11 @@ public class Employeeservice {
                 .setEmail(email)
                 .setUid(uid);
 
-        // password is not collected any more; firebase will auto generate a temporary password if
-        // you choose not to set one, but here we leave it unset (user will need to set password via
-        // reset flow if needed)
-
         UserRecord userRecord = FirebaseAuth.getInstance().createUser(request);
-        // set company as custom claim so we can retrieve it later
         if (company != null) {
             FirebaseAuth.getInstance().setCustomUserClaims(userRecord.getUid(), java.util.Map.of("company", company));
         }
         return userRecord;
-    }
-
-    public UserRecord createUser(String name, String email, String company, String uid) throws FirebaseAuthException {
-        return createUser(name, email, company, uid, null);
     }
 
     public UserRecord getUserById(String uid) throws FirebaseAuthException {
@@ -231,5 +229,24 @@ public class Employeeservice {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private String generateNextNumericUid() throws FirebaseAuthException {
+        long max = 0;
+        ListUsersPage page = FirebaseAuth.getInstance().listUsers(null);
+        while (page != null) {
+            for (UserRecord u : page.getValues()) {
+                String id = u.getUid();
+                if (id != null && id.matches("\\d+")) {
+                    try {
+                        long v = Long.parseLong(id);
+                        if (v > max) max = v;
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+            }
+            page = page.getNextPage();
+        }
+        return String.valueOf(max + 1);
     }
 }

@@ -3,7 +3,8 @@ import axios from 'axios';
 const BASE_URL = "https://automatecoldemail-bakend.onrender.com/users";
 
 class EmployeeService {
-    save(employee, resumeFile) {
+    save(employee) {
+        // backend expects simple form fields (no file)
         const formData = new FormData();
         if (employee.id) {
             formData.append('id', employee.id);
@@ -11,10 +12,6 @@ class EmployeeService {
         formData.append('name', employee.name);
         formData.append('email', employee.email);
         formData.append('company', employee.company);
-        if (resumeFile) {
-            formData.append('resume', resumeFile);
-        }
-        
         return axios.post(`${BASE_URL}/create`, formData,
             { headers: { 'Content-Type': 'multipart/form-data' } }
         );

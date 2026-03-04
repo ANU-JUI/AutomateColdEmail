@@ -35,20 +35,15 @@ public class controller {
             @RequestParam(required = false) String id,
             @RequestParam String name,
             @RequestParam String email,
-            @RequestParam String company,
-            @RequestParam(required = false) MultipartFile resume)
+            @RequestParam String company)
     {
         try {
             if (!isValidEmail(email)) {
                 throw new IllegalArgumentException("Invalid email format: " + email);
             }
-            String resumePath = null;
-            if (resume != null && !resume.isEmpty()) {
-                // save resume with eventual numeric id (timestamp) if not provided
-                String useId = (id == null || id.isEmpty()) ? String.valueOf(System.currentTimeMillis()) : id;
-                resumePath = firebaseService.saveResume(resume, useId);
-            }
-            UserRecord userRecord = firebaseService.createUser(name, email, company, id, resumePath);
+
+            // create user without handling any resume upload; resumes may be added later via update
+            UserRecord userRecord = firebaseService.createUser(name, email, company, id);
             return ResponseEntity.ok(userRecord);
         }
         catch (IllegalArgumentException e) {

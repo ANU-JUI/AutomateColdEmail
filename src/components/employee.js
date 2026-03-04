@@ -21,6 +21,11 @@ Best regards,
         attachResume: true
     });
 
+    const [frontResumeFile, setFrontResumeFile] = useState(null);
+    const [frontResumeName, setFrontResumeName] = useState("");
+    const [frontResumeServerName, setFrontResumeServerName] = useState("");
+    const [uploadingResume, setUploadingResume] = useState(false);
+
     // --- Notification Handler ---
     const showNotification = (message, type = 'success') => {
         setNotification({ message, type, visible: true });
@@ -75,7 +80,8 @@ Best regards,
             toName: employee.name,
             subject: emailTemplate.subject.replace(/\[HR_NAME\]/g, employee.name),
             body: emailTemplate.body.replace(/\[HR_NAME\]/g, employee.name),
-            attachResume: emailTemplate.attachResume
+            attachResume: emailTemplate.attachResume,
+            resumeFilename: emailTemplate.attachResume ? frontResumeServerName : undefined
         };
         // In a real app, you would make the API call here.
         try {
@@ -106,7 +112,8 @@ Best regards,
             toName: emp.name,
             subject: emailTemplate.subject.replace('[HR_NAME]', emp.name),
             body: emailTemplate.body.replace('[HR_NAME]', emp.name),
-            attachResume: emailTemplate.attachResume
+            attachResume: emailTemplate.attachResume,
+            resumeFilename: emailTemplate.attachResume ? frontResumeServerName : undefined
         }));
         // ... API call logic would go here
          try {
@@ -137,7 +144,8 @@ Best regards,
             toName: emp.name,
             subject: emailTemplate.subject.replace('[HR_NAME]', emp.name),
             body: emailTemplate.body.replace('[HR_NAME]', emp.name),
-            attachResume: emailTemplate.attachResume
+            attachResume: emailTemplate.attachResume,
+            resumeFilename: emailTemplate.attachResume ? frontResumeServerName : undefined
         }));
         // ... API call logic would go here
         const allCount = employees.length;
@@ -402,6 +410,39 @@ Best regards,
                             <label htmlFor="attachResume" style={{cursor: 'pointer'}}>
                                 📎 Attach Resume
                             </label>
+                            {emailTemplate.attachResume && (
+                                <div style={{marginTop: '10px'}}>
+                                    <label className="file-input-button" style={{display: 'inline-block', padding: '8px 12px', cursor: 'pointer'}}>
+                                        {uploadingResume ? 'Uploading...' : 'Upload Resume'}
+                                        <input
+                                            type="file"
+                                            accept=".pdf,.doc,.docx"
+                                            style={{display: 'none'}}
+                                            onChange={async (e) => {
+                                                const file = e.target.files[0];
+                                                if (!file) return;
+                                                setFrontResumeFile(file);
+                                                setFrontResumeName(file.name);
+                                                setUploadingResume(true);
+                                                try {
+                                                    const resp = await EmployeeService.uploadResumeToServer(file);
+                                                    // backend returns { filename: "..." }
+                                                    const serverName = resp.data?.filename || resp.data?.name || '';
+                                                    setFrontResumeServerName(serverName);
+                                                    showNotification('✅ Resume uploaded', 'success');
+                                                } catch (err) {
+                                                    console.error('Resume upload failed', err);
+                                                    showNotification('❌ Resume upload failed', 'error');
+                                                } finally {
+                                                    setUploadingResume(false);
+                                                }
+                                                e.target.value = '';
+                                            }}
+                                        />
+                                    </label>
+                                    {frontResumeName && <span style={{marginLeft: '10px', color: '#48bb78', fontWeight: 600}}>{frontResumeName}</span>}
+                                </div>
+                            )}
                         </div>
                         <small className="text-muted" style={{display: 'block', marginTop: '10px'}}>
                             💡 Use <strong>[HR_NAME]</strong> as placeholder for HR contact's name

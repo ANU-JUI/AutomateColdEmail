@@ -10,4 +10,5 @@ public class EmailRequest {
     private String body;
     private boolean includeResumeLink;
     private boolean attachResume;
+    private String resumeFilename;
 }

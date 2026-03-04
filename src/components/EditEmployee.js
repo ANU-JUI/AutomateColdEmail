@@ -252,23 +252,7 @@ const EditEmployee = () => {
                             <label className="form-label">New Password</label>
                             <input type="password" name="password" value={employee.password} placeholder="Enter password" className="form-input" onChange={handleChange} />
                         </div>
-                        <div className="form-group">
-                            <label className="file-input-label">Resume (Optional)</label>
-                            <div className="file-input-wrapper">
-                                <label htmlFor="resume-input" className="file-input-button">
-                                    📄 Click to upload or drag and drop
-                                </label>
-                                <input
-                                    id="resume-input"
-                                    type="file"
-                                    name="resume"
-                                    accept=".pdf,.doc,.docx"
-                                    className="file-input-hidden"
-                                    onChange={handleResumeChange}
-                                />
-                            </div>
-                            {resumeName && <div className="resume-selected">✓ {resumeName}</div>}
-                        </div>
+                        {/* Resume upload moved to main page; editing does not upload resumes */}
                         <div className="form-actions">
                             <button type="submit" className="btn btn-save">Update</button>
                             <button type="button" className="btn btn-clear" onClick={handleClear}>Reset</button>

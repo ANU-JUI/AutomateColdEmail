@@ -48,6 +48,27 @@ public class Employeeservice {
         return filename;
     }
 
+    public String saveTempResume(MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            return null;
+        }
+        String originalFilename = file.getOriginalFilename();
+        String fileExtension = originalFilename != null && originalFilename.contains(".")
+                ? originalFilename.substring(originalFilename.lastIndexOf("."))
+                : "";
+        String filename = System.currentTimeMillis() + "_resume" + fileExtension;
+        Path filepath = Paths.get(UPLOAD_DIR + filename);
+        Files.write(filepath, file.getBytes());
+        return filename;
+    }
+
+    public byte[] getTempResumeBytes(String filename) throws IOException {
+        if (filename == null || filename.isEmpty()) return null;
+        Path filepath = Paths.get(UPLOAD_DIR + filename);
+        if (!Files.exists(filepath)) return null;
+        return Files.readAllBytes(filepath);
+    }
+
     public byte[] getResumeBytes(String userId) throws IOException {
         // Search for the resume file for this user
         File uploadDir = new File(UPLOAD_DIR);

@@ -63,6 +63,15 @@ class EmployeeService {
             { headers: { 'Content-Type': 'multipart/form-data' } }
         );
     }
+
+    uploadResumeToServer(resumeFile) {
+        const formData = new FormData();
+        formData.append('resume', resumeFile);
+        // endpoint is in EmailController
+        return axios.post(`https://automatecoldemail-bakend.onrender.com/api/email/upload-resume`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+    }
 }
 
 export default new EmployeeService();

@@ -30,7 +30,10 @@ public class Emailservice {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public void sendEmail(String toEmail, String toName, String subject, String body, boolean attachResume) {
+    @Autowired
+    private Employeeservice employeeservice;
+
+    public void sendEmail(String toEmail, String toName, String subject, String body, boolean attachResume, String resumeFilename) {
         Mail mail = new Mail();
         mail.setFrom(new Email(fromAddress));
         mail.setSubject(subject);
@@ -40,8 +43,19 @@ public class Emailservice {
         personalization.addTo(new Email(toEmail, toName));
         mail.addPersonalization(personalization);
 
-        if (attachResume && resumeDriveLink != null && !resumeDriveLink.isEmpty()) {
-            byte[] resumeData = downloadResumeFromDrive();
+        if (attachResume) {
+            byte[] resumeData = null;
+            // priority: provided resumeFilename (uploaded), then drive link
+            if (resumeFilename != null && !resumeFilename.isEmpty()) {
+                try {
+                    resumeData = employeeservice.getTempResumeBytes(resumeFilename);
+                } catch (Exception e) {
+                    System.err.println("Error reading uploaded resume: " + e.getMessage());
+                }
+            }
+            if (resumeData == null && resumeDriveLink != null && !resumeDriveLink.isEmpty()) {
+                resumeData = downloadResumeFromDrive();
+            }
             if (resumeData != null) {
                 Attachments attachment = new Attachments();
                 attachment.setFilename("Resume.pdf");
@@ -85,7 +99,7 @@ public class Emailservice {
     public void sendBulkEmails(java.util.List<EmailRequest> emailRequests) {
         for (EmailRequest request : emailRequests) {
             sendEmail(request.getToEmail(), request.getToName(), 
-                     request.getSubject(), request.getBody(), request.isAttachResume());
+                     request.getSubject(), request.getBody(), request.isAttachResume(), request.getResumeFilename());
         }
     }
 }

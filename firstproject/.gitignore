@@ -13,7 +13,8 @@ target/
 .springBeans
 .sts4-cache
 .env
-
+/src/main/resources/credentials.json
+/src/main/resources/client_secret_991112443742-fugc0a4652lqae58k6bkna2tji1727rp.apps.googleusercontent.com.json
 ### IntelliJ IDEA ###
 .idea
 *.iws

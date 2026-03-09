@@ -11,6 +11,9 @@
 # production
 /build
 anu-e8b98-firebase-adminsdk-8i7fc-339f5a6310.json
+client_secret_991112443742-fugc0a4652lqae58k6bkna2tji1727rp.apps.googleusercontent.com.json
+EMAILJS_MIGRATION_GUIDE.md
+CSV_IMPORT_GUIDE.md
 # misc
 .DS_Store
 .env.local

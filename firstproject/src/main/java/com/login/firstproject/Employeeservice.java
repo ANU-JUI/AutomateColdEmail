@@ -1,9 +1,13 @@
 package com.login.firstproject;
 
+import com.google.cloud.firestore.Firestore;
+import com.google.firebase.cloud.FirestoreClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.ListUsersPage;
 import com.google.firebase.auth.UserRecord;
+import java.util.Date;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -14,7 +18,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 //import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +29,7 @@ import org.springframework.stereotype.Service;
 public class Employeeservice {
 
     private static final String UPLOAD_DIR = "uploads/resumes/";
-
+   
     public Employeeservice() {
         // Create the upload directory if it doesn't exist
         File uploadDir = new File(UPLOAD_DIR);
@@ -206,6 +212,20 @@ public class Employeeservice {
             return null;
         }
     }
+    public void saveToken(String userId, String refreshToken) throws Exception {
+
+    Firestore db = FirestoreClient.getFirestore();
+
+    Map<String, Object> data = new HashMap<>();
+
+    data.put("refreshToken", refreshToken);
+    data.put("connected", true);
+    data.put("createdAt", new Date());
+
+    db.collection("gmailUsers")
+      .document(userId)
+      .set(data);
+}
 
     public UserRecord updateUserById(String uid, String name, String email, String company) throws FirebaseAuthException {
         return updateUserById(uid, name, email, company, null);

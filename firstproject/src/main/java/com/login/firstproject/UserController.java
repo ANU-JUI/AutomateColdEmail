@@ -1,35 +1,101 @@
 package com.login.firstproject;
 
+import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.FieldValue;
+import com.google.cloud.firestore.Firestore;
 //import com.google.api.client.http.HttpHeaders;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
+import com.google.firebase.cloud.FirestoreClient;
+
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.json.JSONObject;
 //import org.apache.tomcat.util.http.parser.MediaType;
 //import com.login.firstproject.Employeeservice;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+ 
 
 
 @RestController
 @CrossOrigin(origins = {
-    "https://automatecoldemail.netlify.app/",
+    "https://automatecoldemail.netlify.app",
     "http://localhost:3000"
 })
 @RequestMapping("/users")
-public class controller {
+public class UserController {
 
+    @Value("${gmail.client.secret}")
+    private String clientSecret;
+
+     @Value("${gmail.client.id}")
+    private String clientId;
+    
     @Autowired
     private Employeeservice firebaseService;
 
+private String exchangeCodeForToken(String code) throws Exception {
 
+    String tokenEndpoint = "https://oauth2.googleapis.com/token";
+
+    URL url = new URL(tokenEndpoint);
+
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+    conn.setRequestMethod("POST");
+    conn.setDoOutput(true);
+
+    String params =
+            "client_id=" + clientId +
+            "&client_secret=" + clientSecret +
+            "&code=" + code +
+            "&grant_type=authorization_code" +
+            "&redirect_uri=https://automatecoldemail-bakend.onrender.com/users/oauth/callback";
+
+    OutputStream os = conn.getOutputStream();
+    os.write(params.getBytes());
+    os.flush();
+    os.close();
+
+    BufferedReader br =
+            new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+    String line;
+    StringBuilder response = new StringBuilder();
+
+    while ((line = br.readLine()) != null) {
+        response.append(line);
+    }
+
+    br.close();
+
+    JSONObject json = new JSONObject(response.toString());
+
+    return json.getString("refresh_token");
+}
     @PostMapping("/create")
     public ResponseEntity<?> createUser(
             @RequestParam(required = false) String id,
@@ -180,7 +246,99 @@ public class controller {
             return ResponseEntity.status(500).body("Error updating user: " + e.getMessage());
         }
     }
-    
+    @GetMapping("/oauth/callback")
+public ResponseEntity<?> oauthCallback(@RequestParam String code) throws Exception {
+
+    String refreshToken = exchangeCodeForToken(code);
+
+    String userId = UUID.randomUUID().toString();
+
+    Firestore db = FirestoreClient.getFirestore();
+
+    Map<String,Object> data = new HashMap<>();
+    data.put("refreshToken", refreshToken);
+    data.put("connected", true);
+    data.put("createdAt", new Date());
+
+    db.collection("gmailUsers")
+      .document(userId)
+      .set(data);
+
+    String redirectUrl =
+        "https://automatecoldemail.netlify.app/oauth-success?userId=" + userId;
+
+    return ResponseEntity.status(302)
+            .header("Location", redirectUrl)
+            .build();
+}
+@PostMapping("/disconnect/{userId}")
+public ResponseEntity<?> disconnect(@PathVariable String userId) {
+
+    try {
+
+        Firestore db = FirestoreClient.getFirestore();
+
+        // 1. Fetch user document from Firestore
+        DocumentReference userRef = db.collection("gmailUsers").document(userId);
+        DocumentSnapshot snapshot = userRef.get().get();
+
+        if (!snapshot.exists()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        String refreshToken = snapshot.getString("refreshToken");
+
+        if (refreshToken == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Token not found");
+        }
+
+        // 2. Call Google revoke endpoint
+String revokeUrl = "https://oauth2.googleapis.com/revoke";
+
+MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+body.add("token", refreshToken);
+HttpHeaders headers =new HttpHeaders();
+  headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
+      
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> googleResponse =
+                restTemplate.postForEntity(revokeUrl, entity, String.class);
+
+        if (googleResponse.getStatusCode().is2xxSuccessful()) {
+
+            // 3. Remove tokens from Firestore
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("refreshToken", FieldValue.delete());
+            updates.put("accessToken", FieldValue.delete());
+
+            userRef.update(updates);
+
+            return ResponseEntity.ok("Successfully revoked and cleared");
+
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Google failed to revoke token");
+        }
+
+    } catch (Exception e) {
+
+        try {
+            // Even if Google revoke fails → clear Firestore tokens
+            Firestore db = FirestoreClient.getFirestore();
+            DocumentReference userRef = db.collection("gmailUsers").document(userId);
+
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("refreshToken", FieldValue.delete());
+            updates.put("accessToken", FieldValue.delete());
+
+            userRef.update(updates).get();
+
+        } catch (Exception ignored) {}
+
+        return ResponseEntity.ok("Cleared locally after error: " + e.getMessage());
+    }
+}
     @DeleteMapping("/delete/{uid}")
     public String deleteUser(@PathVariable String uid) {
         try {

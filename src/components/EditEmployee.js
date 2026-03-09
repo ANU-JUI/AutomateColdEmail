@@ -269,7 +269,6 @@ const EditEmployee = () => {
                             <label className="form-label">Company</label>
                             <input type="text" name="company" value={employee.company} placeholder="Enter company" className="form-input" onChange={handleChange} />
                         </div>
-                        {/* Resume upload moved to main page; editing does not upload resumes */}
                         <div className="form-actions">
                             <button type="submit" className="btn btn-save">Update</button>
                             <button type="button" className="btn btn-clear" onClick={handleClear}>Reset</button>

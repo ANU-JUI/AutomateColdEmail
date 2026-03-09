@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import EmployeeService from '../Service/EmployeeService';
 
 const HRContacts = () => {
-    // --- 1. All Original State Hooks ---
+    // --- 1. All Original State Hooks (UNCHANGED) ---
     const [employees, setEmployees] = useState([]);
     const [employeeMap, setEmployeeMap] = useState({}); 
     const [selectedEmployees, setSelectedEmployees] = useState([]);
@@ -26,13 +26,13 @@ const HRContacts = () => {
         attachResume: true
     });
 
-    // --- 2. Notification Handler ---
+    // --- 2. Notification Handler (UNCHANGED) ---
     const showNotification = (message, type = 'success') => {
         setNotification({ message, type, visible: true });
         setTimeout(() => setNotification(prev => ({ ...prev, visible: false })), 3000);
     };
 
-    // --- 3. Lifecycle & Auth ---
+    // --- 3. Lifecycle & Auth (UNCHANGED) ---
     useEffect(() => {
         const storedUserId = localStorage.getItem("gmailUserId");
         if(storedUserId){
@@ -73,39 +73,37 @@ const HRContacts = () => {
         window.location.href = authUrl;
     };
 
-   const disconnectGmail = async () => {
-    if (!userId) {
-        showNotification("No active session found", "error");
-        return;
-    }
-
-    try {
-        // We use POST because we are triggering an action (Revocation) 
-        // rather than just a simple data deletion.
-        const response = await fetch(
-            `https://automatecoldemail-bakend.onrender.com/users/disconnect/${userId}`, 
-            { 
-                method: "POST",
-                headers: { 'Content-Type': 'application/json' }
-            }
-        );
-
-        if (response.ok) {
-            // Clear local state ONLY after the backend confirms Google revoked the token
-            localStorage.removeItem("gmailUserId");
-            setUserId("");
-            setGmailConnected(false);
-            setUserEmail("");
-            showNotification("✅ Access fully revoked. Google will ask for permissions next time!");
-        } else {
-            showNotification("❌ Failed to revoke access from Google", "error");
+    const disconnectGmail = async () => {
+        if (!userId) {
+            showNotification("No active session found", "error");
+            return;
         }
-    } catch (err) {
-        console.error("Revocation Error:", err);
-        showNotification("❌ Network error during disconnection", "error");
-    }
-};
-    // --- 4. Employee Management ---
+
+        try {
+            const response = await fetch(
+                `https://automatecoldemail-bakend.onrender.com/users/disconnect/${userId}`, 
+                { 
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/json' }
+                }
+            );
+
+            if (response.ok) {
+                localStorage.removeItem("gmailUserId");
+                setUserId("");
+                setGmailConnected(false);
+                setUserEmail("");
+                showNotification("✅ Access fully revoked. Google will ask for permissions next time!");
+            } else {
+                showNotification("❌ Failed to revoke access from Google", "error");
+            }
+        } catch (err) {
+            console.error("Revocation Error:", err);
+            showNotification("❌ Network error during disconnection", "error");
+        }
+    };
+
+    // --- 4. Employee Management (UNCHANGED) ---
     const deleteEmployee = (employeeId) => {
         EmployeeService.delete(employeeId).then(() => {
             setEmployeeMap(prev => {
@@ -155,7 +153,7 @@ const HRContacts = () => {
         }
     };
 
-    // --- 5. Email Functionality ---
+    // --- 5. Email Functionality (UNCHANGED) ---
     const sendSingleEmail = async (employee) => {
         const emailRequest = {
             userId: userId,
@@ -206,7 +204,7 @@ const HRContacts = () => {
         } catch (error) { showNotification('❌ Error sending emails', 'error'); }
     };
 
-    // --- 6. CSV & Resume Imports ---
+    // --- 6. CSV & Resume Imports (UNCHANGED) ---
     const importFromCSV = (e) => {
         const file = e.target.files[0];
         if (!file || !file.name.endsWith('.csv')) return showNotification('❌ Select a CSV', 'error');
@@ -221,8 +219,19 @@ const HRContacts = () => {
         window.location.href = "http://automatecoldemail-bakend.onrender.com/users/export";
     };
 
-    // --- 7. Re-Engineered Styles ---
+    // --- 7. ENHANCED RESPONSIVE STYLES ---
     const stunningCSS = `
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            width: 100%;
+        }
+
         :root {
             --brand: #3d3887;
             --brand-dark: #9d98f9;
@@ -231,37 +240,81 @@ const HRContacts = () => {
         }
 
         .main-wrapper {
-background: #833AB4;
-background: linear-gradient(90deg, rgba(131, 58, 180, 1) 0%, rgba(253, 29, 29, 1) 50%, rgba(252, 176, 69, 1) 100%);            min-height: 100vh;
-            padding: 3rem 1.5rem;
+            background: #833AB4;
+            background: linear-gradient(90deg, rgba(131, 58, 180, 1) 0%, rgba(253, 29, 29, 1) 50%, rgba(252, 176, 69, 1) 100%);
+            min-height: 100vh;
+            width: 100%;
+            padding: 20px;
+            overflow-x: hidden;
             font-family: 'Inter', sans-serif;
         }
 
-        .container-box { max-width: 1200px; margin: 0 auto; }
+        .table-wrap {
+            max-height: 600px;
+            overflow-y: auto;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .container-box {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
 
         .glass-panel {
-            background: var(--glass);
-            backdrop-filter: blur(12px);
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 2rem;
+            width: 100%;
             margin-bottom: 2rem;
             box-shadow: 0 10px 30px rgba(111, 18, 18, 0.15);
             border: 1px solid rgba(255,255,255,0.3);
         }
 
-        .header-title { color: white; text-align: center; margin-bottom: 3rem; }
-        .header-title h1 { font-size: 2.75rem; font-weight: 800; letter-spacing: -1px; text-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .header-title {
+            color: rgba(249, 247, 215, 0.9);
+            text-align: center;
+            margin-bottom: 3rem;
+        }
 
-        .form-row { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 1.5rem; align-items: center; }
+        .header-title h1 {
+            font-size: clamp(2rem, 5vw, 2.75rem);
+            font-weight: 800;
+            letter-spacing: -1px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            margin: 0.5rem 0;
+        }
+
+        .header-title p {
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
         
         .m-input {
-            flex: 1; min-width: 250px;
+            width: 100%;
+            min-width: 0px;
             padding: 12px 18px;
             border-radius: 12px;
             border: 2px solid #dfe2e6;
-            outline: none; transition: 0.3s;
+            outline: none;
+            transition: 0.3s;
+            font-size: clamp(14px, 2vw, 16px);
         }
-        .m-input:focus { border-color: var(--brand); box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); }
+
+        .m-input:focus {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
 
         .btn-action {
             padding: 12px 24px;
@@ -272,29 +325,357 @@ background: linear-gradient(90deg, rgba(131, 58, 180, 1) 0%, rgba(253, 29, 29, 1
             transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: clamp(0.85rem, 2vw, 1rem);
+            white-space: nowrap;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.4fr;
+            gap: 30px;
+            width: 100%;
+        }
+
+        .left-panel {
+            padding-left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 35px;
+        }
+
+        .right-panel {
+            padding-right: 5px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .btn-primary {
+            background: var(--brand);
+            color: rgba(249, 247, 215, 0.9);
+        }
+
+        .btn-primary:hover {
+            background: var(--brand-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #ff2323;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f88d00;
+            color: white;
+            border: 1px solid #e2e8f0;
+        }
+
+        .navbar {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            flex-wrap: wrap;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
             gap: 8px;
         }
 
-        .btn-primary { background: var(--brand); color: white; }
-        .btn-primary:hover { background: var(--brand-dark); transform: translateY(-2px); }
-        .btn-danger { background: #ff2323; color: white; }
-        .btn-secondary { background: #f88d00; color: #fcfdff; border: 1px solid #e2e8f0; }
+        .logo {
+            height: 50px;
+            width: auto;
+        }
 
-        .table-wrap { overflow-x: auto; margin-top: 1rem; border-radius: 15px; border: 1px solid #e2e8f0; }
-        .custom-table { width: 100%; border-collapse: collapse; background: white; }
-        .custom-table th { background: #f8fafc; padding: 1rem; color: #64748b; font-size: 0.85rem; text-transform: uppercase; text-align: left; }
-        .custom-table td { padding: 1rem; border-top: 1px solid #f1f5f9; font-size: 0.95rem; }
+        .brand {
+            color: rgba(249, 247, 215, 0.9);
+            font-size: clamp(1.25rem, 3vw, 1.5625rem);
+            font-weight: 600;
+        }
+
+       .table-wrap {
+            width: 100%;
+            margin-top: 1rem;
+            border-radius: 15px;
+        }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .custom-table th {
+            background: #f8fafc;
+            padding: 1rem;
+            color: #64748b;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            text-align: left;
+        }
+
+        .custom-table td {
+            padding: 1rem;
+            border-top: 1px solid #f1f5f9;
+            font-size: 0.95rem;
+            
+        }
 
         .status-badge {
-            background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 20px; font-weight: 600; font-size: 0.8rem;
+            background: #dcfce7;
+            color: #166534;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            white-space: nowrap;
         }
 
         .toast-msg {
-            position: fixed; top: 2rem; right: 2rem; padding: 1rem 2rem; border-radius: 12px;
-            color: white; font-weight: 600; z-index: 9999; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            z-index: 9999;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
             animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-width: 90%;
         }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+@media (max-width: 850px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            
+            /* Hide the actual header */
+            .custom-table thead { display: none; }
+            
+            .custom-table, .custom-table tbody, .custom-table tr, .custom-table td {
+                display: block;
+                alignItems: center;
+                width: 100%;
+            }
+
+            .custom-table tr {
+                background: white;
+                margin-bottom: 20px;
+                border-radius: 15px;
+                padding: 15px;
+                alignItems: center;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            }
+
+            .custom-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border: none;
+                padding: 10px 5px;
+                text-align: right;
+                border-bottom: 1px solid #f1f5f9;
+            }
+
+            .custom-table td:last-child {
+                border-bottom: none;
+            }
+
+            /* Responsive label injection */
+            .custom-table td::before {
+                content: attr(data-label);
+                font-weight: 800;
+                color: var(--brand);
+                text-align: left;
+                flex: 1;
+                font-size: 0.85rem;
+            }
+
+            .table-action-buttons {
+                justify-content: flex-end;
+                width: 100%;
+            }
+        }
+        /* Responsive breakpoints */
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .left-panel,
+            .right-panel {
+                padding: 0;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-wrapper {
+                padding: 10px;
+            }
+
+            .glass-panel {
+                padding: 1.25rem;
+                border-radius: 15px;
+            }
+
+            .header-title {
+                margin-bottom: 2rem;
+            }
+
+            .form-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .btn-action {
+                width: 120%;
+                justify-content: center;
+                padding: 14px 20px;
+            }
+
+            .left-panel,
+            .right-panel {
+                gap: 20px;
+            }
+
+            .toast-msg {
+                top: 1rem;
+                right: 1rem;
+                left: 1rem;
+                padding: 0.75rem 1.5rem;
+            }
+
+            .custom-table {
+                font-size: 0.85rem;
+            }
+
+            .custom-table th,
+            .custom-table td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .table-actions {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .table-actions .btn-action {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-wrapper {
+                padding: 5px;
+            }
+
+            .glass-panel {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            .navbar {
+                padding: 10px;
+            }
+
+            .logo {
+                height: 35px;
+            }
+
+            .header-title {
+                margin-bottom: 1.5rem;
+            }
+
+            .m-input {
+                padding: 10px 14px;
+            }
+
+            .btn-action {
+                padding: 12px 16px;
+                font-size: 0.875rem;
+
+            }
+
+            textarea.m-input {
+                min-height: 120px;
+            }
+
+            .custom-table {
+                font-size: 0.75rem;
+            }
+
+            .custom-table th,
+            .custom-table td {
+                padding: 0.5rem 0.25rem;
+            }
+
+            .status-badge {
+                font-size: 0.7rem;
+                padding: 2px 8px;
+            }
+        }
+
+        /* For very small screens */
+        @media (max-width: 320px) {
+            .glass-panel {
+                padding: 0.75rem;
+            }
+
+            .btn-action {
+                padding: 10px 12px;
+                font-size: 0.8rem;
+            }
+
+            .custom-table {
+                font-size: 0.7rem;
+            }
+        }
+              .template-actions{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:nowrap;
+}
+
+        /* Utility class for mobile table actions */
+        .table-action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: nowrap;
+        }
+
+       @media (max-width:768px){
+
+.table-action-buttons{
+    flex-direction:column;
+    width:100%;
+}
+    
+.template-actions{
+flex-direction:column;
+align-items:center;
+width:100%;
+}
+
+  
+.table-action-buttons .btn-action{
+    width:100%;
+}
+
+}
     `;
 
     return (
@@ -307,148 +688,165 @@ background: linear-gradient(90deg, rgba(131, 58, 180, 1) 0%, rgba(253, 29, 29, 1
                 </div>
             )}
 
+            <div className="navbar">
+                <div className="logo-section">
+                    <img src="/logo.png" alt="ColdReach Logo" className="logo" />
+                    <span className="brand">ColdReach</span>
+                </div>
+            </div>
+
+            <div className="header-title">
+                <h1>Cold Reach</h1>
+                <p>Automate cold emails effortlessly</p>
+            </div>
+
             <div className="container-box">
-                <div className="header-title">
-                    <h1>COLD EMAIL AUTOMATION</h1>
-                    <p>Effortlessly connect with HRs at scale</p>
-                </div>
-
-                {/* --- Gmail Auth Panel --- */}
-                <div className="glass-panel">
-                    <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'1.5rem' }}>
-                        <h3 style={{ fontWeight: 1000 }}>📩 Gmail Connectivity</h3>
-                        {gmailConnected && <span className="status-badge">System Linked</span>}
-                    </div>
-                    <div className="form-row">
-                        <input 
-                            type="email" className="m-input" placeholder="example@gmail.com" 
-                            value={userEmail} onChange={(e) => setUserEmail(e.target.value)}
-                        />
-                        <button className="btn-action btn-primary" onClick={connectGmail} disabled={gmailConnected}>
-                            🔐 {gmailConnected ? 'Connected' : 'Authorize Gmail'}
-                        </button>
-                        {gmailConnected && (
-                            <button className="btn-action btn-secondary" onClick={disconnectGmail}>Disconnect</button>
-                        )}
-                    </div>
-                </div>
-
-                {/* --- Template Panel --- */}
-                <div className="glass-panel">
-                    <h3 style={{ marginBottom: '1.5rem', fontWeight: 800 }}>📧 Dynamic Template</h3>
-                    <div className="form-row" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
-                        <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Subject Line</label>
-                        <input 
-                            className="m-input" value={emailTemplate.subject} 
-                            onChange={(e) => setEmailTemplate({...emailTemplate, subject: e.target.value})}
-                        />
-                        
-                        <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Email Content</label>
-                        <textarea 
-                            className="m-input" rows="8" value={emailTemplate.body}
-                            onChange={(e) => setEmailTemplate({...emailTemplate, body: e.target.value})}
-                        />
-                    </div>
-                    <div className="form-row">
-                        <div style={{ display:'flex', alignItems:'center', gap: '8px' }}>
-                            <input 
-                                type="checkbox" id="attach" checked={emailTemplate.attachResume}
-                                onChange={(e) => setEmailTemplate({...emailTemplate, attachResume: e.target.checked})}
-                            />
-                            <label htmlFor="attach" style={{ cursor:'pointer' }}>📎 Include Resume Link</label>
-                        </div>
-                        
-                        {emailTemplate.attachResume && (
-                            <label className="btn-action btn-primary" style={{ margin: 0 }}>
-                                {uploadingResume ? 'Uploading...' : '📤 Upload PDF/Doc'}
+                <div className="dashboard-grid">
+                    {/* --- Gmail Auth Panel --- */}
+                    <div className="left-panel">
+                        <div className="glass-panel">
+                            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'1.5rem', flexWrap: 'wrap', gap: '10px' }}>
+                                <h3 style={{ fontWeight: 1000, fontSize: 'clamp(1.1rem, 3vw, 1.3rem)' }}>📩 Gmail Connectivity</h3>
+                                {gmailConnected && <span className="status-badge">System Linked</span>}
+                            </div>
+                            <div className="form-row">
                                 <input 
-                                    type="file" style={{ display: 'none' }} 
-                                    onChange={async (e) => {
-                                        const file = e.target.files[0];
-                                        if (!file) return;
-                                        setUploadingResume(true);
-                                        try {
-                                            const resp = await EmployeeService.uploadResumeToServer(file);
-                                            setFrontResumeName(file.name);
-                                            setFrontResumeServerName(resp.data?.filename || '');
-                                            showNotification('✅ Resume Ready');
-                                        } catch (err) { showNotification('❌ Upload Failed', 'error'); }
-                                        finally { setUploadingResume(false); }
-                                    }}
+                                    type="email" className="m-input" placeholder="example@gmail.com" 
+                                    value={userEmail} onChange={(e) => setUserEmail(e.target.value)}
                                 />
-                            </label>
-                        )}
-                        {frontResumeName && <span style={{ color: '#6366f1', fontWeight: 700 }}>{frontResumeName}</span>}
-                    </div>
-                </div>
+                                <button className="btn-action btn-primary template-actions" onClick={connectGmail} disabled={gmailConnected}>
+                                    🔐 {gmailConnected ? 'Connected' : 'Authorize Gmail'}
+                                </button>
+                                {gmailConnected && (
+                                    <button className="btn-action btn-secondary template-actions" onClick={disconnectGmail}>Disconnect</button>
+                                )}
+                            </div>
+                        </div>
 
-                {/* --- Table & Actions Panel --- */}
-                <div className="glass-panel">
-                    <div className="form-row" style={{ justifyContent: 'space-between' }}>
-                        <form onSubmit={searchEmployees} style={{ display:'flex', flex: 1, gap: '10px' }}>
-                            <input 
-                                className="m-input" placeholder="🔍 Search HR by name, email or company..." 
-                                value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                            <button type="submit" className="btn-action btn-primary">Search</button>
-                        </form>
-                        <div className="form-row" style={{ marginBottom: 0 }}>
-                            <a href="/addemployee" className="btn-action btn-secondary">➕ Add Contact</a>
-                            <button className="btn-action btn-primary" onClick={sendToSelected} disabled={selectedEmployees.length === 0}>
-                                📤 Bulk Send ({selectedEmployees.length})
-                            </button>
+                        {/* --- Template Panel --- */}
+                        <div className="glass-panel">
+                            <h3 style={{ marginBottom: '1.5rem', fontWeight: 800, fontSize: 'clamp(1.1rem, 3vw, 1.3rem)' }}>📧 Dynamic Template</h3>
+                            <div className="form-row template-actions" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+                                <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Subject Line</label>
+                                <input 
+                                    className="m-input" value={emailTemplate.subject} 
+                                    onChange={(e) => setEmailTemplate({...emailTemplate, subject: e.target.value})}
+                                />
+                                
+                                <label style={{ fontWeight: 600, fontSize: '0.9rem', marginTop: '10px' }}>Email Content</label>
+                                <textarea 
+                                    className="m-input" rows="8" value={emailTemplate.body}
+                                    onChange={(e) => setEmailTemplate({...emailTemplate, body: e.target.value})}
+                                />
+                            </div>
+                            <div className="form-row template-actions" style ={{paddingTop: '10px' }}>
+                                <div style={{ display:'flex', alignItems:'center', gap: '8px' }}>
+                                    <input 
+                                        type="checkbox" id="attach" checked={emailTemplate.attachResume}
+                                        onChange={(e) => setEmailTemplate({...emailTemplate, attachResume: e.target.checked})}
+                                    />
+                                    <label htmlFor="attach" style={{ cursor:'pointer', fontSize: 'clamp(0.85rem, 2vw, 1rem)' }}>📎 Include Resume</label>
+                                </div>
+                                
+                                {emailTemplate.attachResume && (
+                                    <label className="btn-action btn-primary template-actions" style={{ margin: 0 }}>
+                                        {uploadingResume ? 'Uploading...' : '📤 Upload PDF/Doc'}
+                                        <input 
+                                            type="file" style={{ display: 'none' }} 
+                                            onChange={async (e) => {
+                                                const file = e.target.files[0];
+                                                if (!file) return;
+                                                setUploadingResume(true);
+                                                try {
+                                                    const resp = await EmployeeService.uploadResumeToServer(file);
+                                                    setFrontResumeName(file.name);
+                                                    setFrontResumeServerName(resp.data?.filename || '');
+                                                    showNotification('✅ Resume Ready');
+                                                } catch (err) { showNotification('❌ Upload Failed', 'error'); }
+                                                finally { setUploadingResume(false); }
+                                            }}
+                                        />
+                                    </label>
+                                )}
+                                {frontResumeName && <span style={{ color: '#6366f1', fontWeight: 700, fontSize: 'clamp(0.8rem, 2vw, 0.95rem)' }}>{frontResumeName}</span>}
+                            </div>
                         </div>
                     </div>
 
-                    <div className="form-row" style={{ marginTop: '1.5rem', background: '#f8fafc', padding: '1rem', borderRadius: '12px' }}>
-                        <button className="btn-action btn-secondary" onClick={exportToCSV}>📊 Export</button>
-                        <label className="btn-action btn-secondary">
-                            📥 Import CSV
-                            <input type="file" style={{ display: 'none' }} onChange={importFromCSV} />
-                        </label>
-                        <button className="btn-action btn-danger" onClick={deleteAllEmployees}>🗑️ Delete All</button>
-                    </div>
+                    {/* --- Table & Actions Panel --- */}
+                    <div className="right-panel">
+                        <div className="glass-panel">
+                            <div className="form-row" style={{ justifyContent: 'space-between' }}>
+                                <form onSubmit={searchEmployees} style={{ display:'flex', flex: 1, gap: '10px', flexWrap: 'wrap' }}>
+                                    <input 
+                                        className="m-input" placeholder="🔍 Search HR..." 
+                                        value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                                        style={{ flex: '1', minWidth: '150px' }}
+                                    />
+                                    <button type="submit" className="btn-action btn-primary">Search</button>
+                                </form>
+                                <div className="form-row template-actions" style={{ marginBottom: 0 }}>
+                                    <a href="/addemployee" className="btn-action btn-secondary template-actions">➕ Add Contact</a>
+                                    <button className="btn-action btn-primary template-actions" onClick={sendToSelected} disabled={selectedEmployees.length === 0}>
+                                        📤 Bulk Send ({selectedEmployees.length})
+                                    </button>
+                                </div>
+                            </div>
 
-                    <div className="table-wrap">
-                        <table className="custom-table">
-                            <thead>
-                                <tr>
-                                    <th><input type="checkbox" onChange={(e) => setSelectedEmployees(e.target.checked ? employees.map(emp => emp.id) : [])} /></th>
-                                    <th>HR Lead</th>
-                                    <th>Email</th>
-                                    <th>Company</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {employees.map(emp => (
-                                    <tr key={emp.id}>
-                                        <td>
-                                            <input 
-                                                type="checkbox" checked={selectedEmployees.includes(emp.id)}
-                                                onChange={(e) => e.target.checked ? setSelectedEmployees([...selectedEmployees, emp.id]) : setSelectedEmployees(selectedEmployees.filter(id => id !== emp.id))}
-                                            />
-                                        </td>
-                                        <td style={{ fontWeight: 700 }}>{emp.name}</td>
-                                        <td style={{ color: '#64748b' }}>{emp.email}</td>
-                                        <td><span style={{ background: '#f1f5f9', padding: '4px 8px', borderRadius: '6px' }}>{emp.company}</span></td>
-                                        <td>
-                                            <div style={{ display:'flex', gap: '8px' }}>
-                                                <button className="btn-action btn-primary" style={{ padding: '6px 10px' }} onClick={() => sendSingleEmail(emp)}>⚡ Send</button>
-                                                <button className="btn-action btn-danger" style={{ padding: '6px 10px' }} onClick={() => deleteEmployee(emp.id)}>🗑️</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                            <div className="form-row " style={{ marginTop: '1.5rem', background: '#f8fafc', padding: '1rem', borderRadius: '12px' }}>
+                                <button className="btn-action btn-secondary template-actions" onClick={exportToCSV}>📊 Export</button>
+                                <label className="btn-action btn-secondary template-actions">
+                                    📥 Import CSV
+                                    <input type="file" style={{ display: 'none' }} onChange={importFromCSV} />
+                                </label>
+                                <button className="btn-action btn-danger template-actions" onClick={deleteAllEmployees}>🗑️ Delete All</button>
+                            </div>
 
-                    <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <p style={{ color: '#64748b', fontSize: '0.9rem' }}>Page {page + 1}</p>
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <button className="btn-action btn-secondary" onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}>◀ Prev</button>
-                            <button className="btn-action btn-secondary" onClick={() => setPage(p => p + 1)} disabled={lastLoadCount < pageSize}>Next ▶</button>
+                            <div className="table-wrap">
+                                <table className="custom-table">
+                                    <thead>
+                                        <tr>
+                                            <th><input type="checkbox" onChange={(e) => setSelectedEmployees(e.target.checked ? employees.map(emp => emp.id) : [])} /></th>
+                                            <th>HR Lead</th>
+                                            <th>Email</th>
+                                            <th>Company</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {employees.map(emp => (
+                                            <tr key={emp.id}>
+                                                <td style={{ display:'flex', width: '40px',alignItems: 'center' }} data-label="Select">
+                                                    
+                                                    <input 
+                                                       style={{ marginLeft: '10px' }}
+                                                        type="checkbox" checked={selectedEmployees.includes(emp.id)}
+                                                        onChange={(e) => e.target.checked ? setSelectedEmployees([...selectedEmployees, emp.id]) : setSelectedEmployees(selectedEmployees.filter(id => id !== emp.id))}
+                                                    />
+                                            
+                                                </td>
+                                                <td style={{ fontWeight: 700 }} data-label="Name">{emp.name}</td>
+                                                <td style={{ color: '#64748b' }} data-label="Email">{emp.email}</td>
+                                                <td><span style={{ background: '#f1f5f9', padding: '4px 8px', borderRadius: '6px', display: 'inline-block' }} data-label="Company">{emp.company}</span></td>
+                                                <td data-label="Actions">
+                                                    <div className="table-action-buttons">
+                                                        <button className="btn-action btn-primary" style={{ padding: '6px 10px', fontSize: 'clamp(0.75rem, 2vw, 0.9rem)' }} onClick={() => sendSingleEmail(emp)}>⚡ Send</button>
+                                                        <button className="btn-action btn-danger" style={{ padding: '6px 10px', fontSize: 'clamp(0.75rem, 2vw, 0.9rem)' }} onClick={() => deleteEmployee(emp.id)}>🗑️</button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                                <p style={{ color: '#3f4957', fontSize: '0.9rem' }}>Page {page + 1}</p>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <button className="btn-action btn-secondary" onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}>◀ Prev</button>
+                                    <button className="btn-action btn-secondary" onClick={() => setPage(p => p + 1)} disabled={lastLoadCount < pageSize}>Next ▶</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

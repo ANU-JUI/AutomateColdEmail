@@ -288,9 +288,9 @@ public ResponseEntity<?> disconnect(@PathVariable String userId) {
 
         String refreshToken = snapshot.getString("refreshToken");
 
-        if (refreshToken == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Token not found");
-        }
+       if (refreshToken == null) {
+    return ResponseEntity.ok("Already disconnected");
+}
 
         // 2. Call Google revoke endpoint
 String revokeUrl = "https://oauth2.googleapis.com/revoke";
